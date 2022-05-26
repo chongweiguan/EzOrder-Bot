@@ -3,6 +3,8 @@ from telegram import *
 
 updater = Updater(token='5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
 dispatcher = updater.dispatcher
+START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
+newOrder = [0]
 
 def startCommand(update: Update, context: CallbackContext) -> None:
     """Sends a message with three inline buttons attached."""
@@ -28,22 +30,26 @@ def response(update: Update, context: CallbackContext) -> None:
 
 def NewOrder(update: Update, context: CallbackContext):
     update.message.reply_text('What will the title of your Order List be?')
+    newOrder[0] = 1
     return ConversationHandler.END
 
 def orderList(update: Update, _: CallbackContext) -> None:
-    ORDER_MESSAGE_BUTTONS = [
-        [InlineKeyboardButton('Publish',
+    if newOrder[0] == 1:
+        ORDER_MESSAGE_BUTTONS = [
+            [InlineKeyboardButton('Publish',
                               url='https://docs.python-telegram-bot.org/en/stable/telegram.inlinekeyboardbutton.html')]
-    ]
-    text = f"{update.message.text}\n\n\nOrders: "
-    reply_markup = InlineKeyboardMarkup(ORDER_MESSAGE_BUTTONS)
-    update.message.reply_text(
-        text=text,
-        reply_markup=reply_markup,
-        disable_web_page_preview=True
-    )
-    print(update.callback_query)
-    return ConversationHandler.END
+        ]
+        text = f"{update.message.text}\n\n\nOrders: "
+        reply_markup = InlineKeyboardMarkup(ORDER_MESSAGE_BUTTONS)
+        update.message.reply_text(
+            text=text,
+            reply_markup=reply_markup,
+            disable_web_page_preview=True
+        )
+        newOrder[0] = 0
+        return ConversationHandler.END
+    else:
+        update.message.reply_text(START_MESSAGE)
 
 def check(update: Update, _: CallbackContext) -> None:
     print(update)
@@ -61,15 +67,6 @@ def main():
     dispatcher.add_handler(CallbackQueryHandler(response))
     dispatcher.add_error_handler(error)
     dispatcher.add_handler(MessageHandler(Filters.text, orderList))
-
- #   conv_handler = ConversationHandler(
- #       entry_points=[dispatcher.add_handler(CallbackQueryHandler(response))],
- #       states={
- #           ORDER: [MessageHandler(Filters.text, orderList)]
- #       },
- #       fallbacks=[CommandHandler('cancel', cancel)],
- #   )
- #   dispatcher.add_handler(conv_handler)
 
     updater.start_polling()
     updater.idle()
