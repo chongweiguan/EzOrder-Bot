@@ -3,6 +3,8 @@ from telegram import *
 
 updater = Updater(token='5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
 dispatcher = updater.dispatcher
+START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
+newOrder = [0]
 
 
 TITLE_ARRAY = []
@@ -10,43 +12,46 @@ TITLE_ARRAY = []
 def startCommand(update: Update, context: CallbackContext) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
-        [KeyboardButton("/NewOrder")],
-        [KeyboardButton("Check")],
-        [KeyboardButton("Split")]
+        [
+            InlineKeyboardButton("New Order", callback_data="New Order"),
+            InlineKeyboardButton("Check", callback_data="Check"),
+            InlineKeyboardButton("Split", callback_data="Split")
+        ]
     ]
-    context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Hi! I am EzOrder Bot, I am here to make your life a little bit"
-                                  "easier Here are some commands to interact with me!",
-                             reply_markup=ReplyKeyboardMarkup(keyboard))
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text("Hi! I am EzOrder Bot, I am here to make your life a little bit"
+                              "easier Here are some commands to interact with me!",
+                              reply_markup=reply_markup)
 
 
-# def response(update: Update, context: CallbackQuery) -> None:
-#    """Parses the CallbackQuery and updates the message text."""
-#    query = update.callback_query
-#    query.answer()
-#    if query.data == "New Order":
-#        query.message.reply_text("What is the name of your order list")
-#        print(query)
+def response(update: Update, context: CallbackContext) -> None:
+    """Parses the CallbackQuery and updates the message text."""
+    query = update.callback_query
+    query.answer()
+    if query.data == "New Order":
+        return NewOrder(query,context)
 
-def newOrder(update: Update, context: CallbackContext):
+def NewOrder(update: Update, context: CallbackContext):
     update.message.reply_text('What will the title of your Order List be?')
-    return ORDER
-
+    newOrder[0] = 1
 
 def orderList(update: Update, _: CallbackContext) -> None:
-    text = f"{update.message.text}\n\n\nOrders: "
-    title = f"{update.message.text}"
-    ORDER_MESSAGE_BUTTONS = [
-        [InlineKeyboardButton('Publish Order List', switch_inline_query=title)]
-    ]
-    TITLE_ARRAY.append(title)
-    reply_markup = InlineKeyboardMarkup(ORDER_MESSAGE_BUTTONS)
-    update.message.reply_text(
-        text=text,
-        reply_markup=reply_markup,
-        disable_web_page_preview=True
-    )
-    return ConversationHandler.END
+    if newOrder[0] == 1:
+        text = f"{update.message.text}\n\n\nOrders: "
+        title = f"{update.message.text}"
+        ORDER_MESSAGE_BUTTONS = [
+            [InlineKeyboardButton('Publish Order List', switch_inline_query=title)]
+        ]
+        TITLE_ARRAY.append(title)
+        reply_markup = InlineKeyboardMarkup(ORDER_MESSAGE_BUTTONS)
+        update.message.reply_text(
+            text=text,
+            reply_markup=reply_markup,
+            disable_web_page_preview=True
+        )
+        newOrder[0] = 0
+    else:
+        update.message.reply_text(START_MESSAGE)
 
 
 def cancel(update: Update, _: CallbackContext) -> None:
@@ -62,20 +67,11 @@ ORDER = range(1)
 
 def main():
     dispatcher.add_handler(CommandHandler("start", startCommand))
-    # dispatcher.add_handler(CallbackQueryHandler(response))
+    dispatcher.add_handler(CallbackQueryHandler(response))
     dispatcher.add_error_handler(error)
-
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("NewOrder", newOrder)],
-        states={
-            ORDER: [MessageHandler(Filters.text, orderList)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
-    )
-    dispatcher.add_handler(conv_handler)
+    dispatcher.add_handler(MessageHandler(Filters.text, orderList))
 
     updater.start_polling()
     updater.idle()
-
 
 main()
