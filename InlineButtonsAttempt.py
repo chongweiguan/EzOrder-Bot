@@ -17,7 +17,7 @@ def startCommand(update: Update, context: CallbackContext) -> None:
     update.message.reply_text("Hi! I am EzOrder Bot, I am here to make your life a little bit"
                               "easier Here are some commands to interact with me!",
                               reply_markup=reply_markup)
-    #print(update.callback_query)
+
 
 def response(update: Update, context: CallbackContext) -> None:
     """Parses the CallbackQuery and updates the message text."""
