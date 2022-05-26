@@ -5,6 +5,8 @@ updater = Updater(token='5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
 dispatcher = updater.dispatcher
 
 
+TITLE_ARRAY = []
+
 def startCommand(update: Update, context: CallbackContext) -> None:
     """Sends a message with three inline buttons attached."""
     keyboard = [
@@ -32,11 +34,12 @@ def newOrder(update: Update, context: CallbackContext):
 
 
 def orderList(update: Update, _: CallbackContext) -> None:
-    ORDER_MESSAGE_BUTTONS = [
-        [InlineKeyboardButton('Publish',
-                              url='https://docs.python-telegram-bot.org/en/stable/telegram.inlinekeyboardbutton.html')]
-    ]
     text = f"{update.message.text}\n\n\nOrders: "
+    title = f"{update.message.text}"
+    ORDER_MESSAGE_BUTTONS = [
+        [InlineKeyboardButton('Publish Order List', switch_inline_query=title)]
+    ]
+    TITLE_ARRAY.append(title)
     reply_markup = InlineKeyboardMarkup(ORDER_MESSAGE_BUTTONS)
     update.message.reply_text(
         text=text,
