@@ -28,7 +28,6 @@ def response(update: Update, context: CallbackContext) -> None:
 
 def NewOrder(update: Update, context: CallbackContext):
     update.message.reply_text('What will the title of your Order List be?')
-    #print(update)
     return ConversationHandler.END
 
 def orderList(update: Update, _: CallbackContext) -> None:
