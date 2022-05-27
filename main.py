@@ -35,7 +35,7 @@ def NewOrder(update: Update, context: CallbackContext):
     update.message.reply_text('What will the title of your Order List be?')
     newOrder[0] = 1
 
-def orderList(update: Update, _: CallbackContext) -> None:
+def orderList(update: Update, context: CallbackContext) -> None:
     if newOrder[0] == 1:
         text = f"{update.message.text}\n\n\nOrders: "
         title = f"{update.message.text}"
@@ -61,6 +61,20 @@ def cancel(update: Update, _: CallbackContext) -> None:
 def error(update, context):
     print(f"Update {update} caused error {context.error}")
 
+def testing(update: Update, context: CallbackContext) -> None:
+    query = update.inline_query.query
+    if not query:
+        return
+    result = []
+    result.append(
+        InlineQueryResultArticle(
+            id='1',
+            title='hello',
+            input_message_content=InputTextMessageContent("I am a message")
+        )
+    )
+    context.bot.answer_inline_query(update.inline_query.id,result)
+
 
 ORDER = range(1)
 
@@ -70,6 +84,7 @@ def main():
     dispatcher.add_handler(CallbackQueryHandler(response))
     dispatcher.add_error_handler(error)
     dispatcher.add_handler(MessageHandler(Filters.text, orderList))
+    dispatcher.add_handler(InlineQueryHandler(testing))
 
     updater.start_polling()
     updater.idle()
