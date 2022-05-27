@@ -61,14 +61,18 @@ def cancel(update: Update, _: CallbackContext) -> None:
 def error(update, context):
     print(f"Update {update} caused error {context.error}")
 
-def inline_caps(update: Update, context: CallbackContext):
+def inlineOrderList(update: Update, context: CallbackContext):
     results = []
+    ORDER_BUTTONS = [
+        [InlineKeyboardButton('Add Order', callback_data='Add Order')]
+    ]
     for title in TITLE_ARRAY:
       results.append(
         InlineQueryResultArticle(
             id=title,
             title=title,
-            input_message_content=InputTextMessageContent('hello')
+            input_message_content=InputTextMessageContent(title + '\n\n\nOrders:'),
+            reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
         )
       )
     update.inline_query.answer(results)
@@ -81,7 +85,7 @@ def main():
     dispatcher.add_handler(CallbackQueryHandler(response))
     dispatcher.add_error_handler(error)
     dispatcher.add_handler(MessageHandler(Filters.text, orderList))
-    dispatcher.add_handler(InlineQueryHandler(inline_caps))
+    dispatcher.add_handler(InlineQueryHandler(inlineOrderList))
 
     updater.start_polling()
     updater.idle()
