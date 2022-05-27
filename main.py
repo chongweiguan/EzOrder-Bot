@@ -61,20 +61,17 @@ def cancel(update: Update, _: CallbackContext) -> None:
 def error(update, context):
     print(f"Update {update} caused error {context.error}")
 
-def testing(update: Update, context: CallbackContext) -> None:
-    query = update.inline_query.query
-    if not query:
-        return
-    result = []
-    result.append(
+def inline_caps(update: Update, context: CallbackContext):
+    results = []
+    for title in TITLE_ARRAY:
+      results.append(
         InlineQueryResultArticle(
-            id='1',
-            title='hello',
-            input_message_content=InputTextMessageContent("I am a message")
+            id=title,
+            title=title,
+            input_message_content=InputTextMessageContent('hello')
         )
-    )
-    context.bot.answer_inline_query(update.inline_query.id,result)
-
+      )
+    update.inline_query.answer(results)
 
 ORDER = range(1)
 
@@ -84,7 +81,7 @@ def main():
     dispatcher.add_handler(CallbackQueryHandler(response))
     dispatcher.add_error_handler(error)
     dispatcher.add_handler(MessageHandler(Filters.text, orderList))
-    dispatcher.add_handler(InlineQueryHandler(testing))
+    dispatcher.add_handler(InlineQueryHandler(inline_caps))
 
     updater.start_polling()
     updater.idle()
