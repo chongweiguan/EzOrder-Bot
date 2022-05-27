@@ -44,6 +44,7 @@ def orderList(update: Update, context: CallbackContext) -> None:
         ]
         TITLE_ARRAY.append(title)
         reply_markup = InlineKeyboardMarkup(ORDER_MESSAGE_BUTTONS)
+
         update.message.reply_text(
             text=text,
             reply_markup=reply_markup,
