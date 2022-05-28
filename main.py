@@ -31,6 +31,9 @@ def response(update: Update, context: CallbackContext) -> None:
     if query.data == "New Order":
         return NewOrder(query,context)
 
+    if query.data == "Add Order":
+        print(update)
+
 def NewOrder(update: Update, context: CallbackContext):
     update.message.reply_text('What will the title of your Order List be?')
     newOrder[0] = 1
@@ -40,7 +43,11 @@ def orderList(update: Update, context: CallbackContext) -> None:
         text = f"{update.message.text}\n\n\nOrders: "
         title = f"{update.message.text}"
         ORDER_MESSAGE_BUTTONS = [
-            [InlineKeyboardButton('Publish Order List', switch_inline_query=title)]
+            [InlineKeyboardButton('Publish Order List', switch_inline_query=title)],
+            [
+                InlineKeyboardButton('Close Order', callback_data='Close Order'),
+                InlineKeyboardButton('Open Order', callback_data='Open Order')
+            ]
         ]
         TITLE_ARRAY.append(title)
         reply_markup = InlineKeyboardMarkup(ORDER_MESSAGE_BUTTONS)
@@ -64,7 +71,9 @@ def error(update, context):
 def inlineOrderList(update: Update, context: CallbackContext):
     results = []
     ORDER_BUTTONS = [
-        [InlineKeyboardButton('Add Order', callback_data='Add Order')]
+        [InlineKeyboardButton('Add Order', callback_data='Add Order')],
+        [InlineKeyboardButton('Edit Order', callback_data='Edit Order')],
+        [InlineKeyboardButton('Copy Order', callback_data='Copy Order')]
     ]
     for title in TITLE_ARRAY:
       results.append(
