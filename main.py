@@ -8,6 +8,7 @@ newOrder = [0]
 
 
 TITLE_ARRAY = []
+PHONE_NUMBER = []
 
 def startCommand(update: Update, context: CallbackContext) -> None:
     """Sends a message with three inline buttons attached."""
@@ -31,12 +32,18 @@ def response(update: Update, context: CallbackContext) -> None:
     if query.data == "New Order":
         return NewOrder(query,context)
 
+
 def NewOrder(update: Update, context: CallbackContext):
     update.message.reply_text('What will the title of your Order List be?')
     newOrder[0] = 1
 
-def orderList(update: Update, context: CallbackContext) -> None:
+def phoneNumber(update: Update, context: CallbackContext):
     if newOrder[0] == 1:
+        update.message.reply_text('What is your phone number?')
+        newOrder[0] = 2
+
+def orderList(update: Update, context: CallbackContext) -> None:
+    if newOrder[0] == 2:
         text = f"{update.message.text}\n\n\nOrders: "
         title = f"{update.message.text}"
         ORDER_MESSAGE_BUTTONS = [
@@ -86,8 +93,8 @@ def main():
     dispatcher.add_handler(CallbackQueryHandler(response))
     dispatcher.add_error_handler(error)
     dispatcher.add_handler(MessageHandler(Filters.text, orderList))
+    dispatcher.add_handler(MessageHandler(Filters.text, phoneNumber))
     dispatcher.add_handler(InlineQueryHandler(inlineOrderList))
-
     updater.start_polling()
     updater.idle()
 
