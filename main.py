@@ -6,7 +6,6 @@ dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
 newOrder = [0]
 
-
 TITLE_ARRAY = []
 CURRENT_TITLE = [" "]
 PHONE_NUMBER = []
