@@ -8,6 +8,8 @@ newOrder = [0]
 
 
 TITLE_ARRAY = []
+CURRENT_TITLE = [" "]
+PHONE_NUMBER = []
 
 def startCommand(update: Update, context: CallbackContext) -> None:
     """Sends a message with three inline buttons attached."""
@@ -31,17 +33,23 @@ def response(update: Update, context: CallbackContext) -> None:
     if query.data == "New Order":
         return NewOrder(query,context)
 
-    if query.data == "Add Order":
-        print(update)
-
 def NewOrder(update: Update, context: CallbackContext):
     update.message.reply_text('What will the title of your Order List be?')
     newOrder[0] = 1
 
+def phoneNumber(update: Update, context: CallbackContext):
+    if newOrder[0] == 1:
+        update.message.reply_text('What is your phone number?')
+        newOrder[0] = 2
+
 def orderList(update: Update, context: CallbackContext) -> None:
     if newOrder[0] == 1:
-        text = f"{update.message.text}\n\n\nOrders: "
-        title = f"{update.message.text}"
+        update.message.reply_text('What is your phone number?')
+        newOrder[0] = 2
+        CURRENT_TITLE[0] = f"{update.message.text}"
+    elif newOrder[0] == 2:
+        text = CURRENT_TITLE[0] + "\n\n\nOrders: "
+        title = CURRENT_TITLE[0]
         ORDER_MESSAGE_BUTTONS = [
             [InlineKeyboardButton('Publish Order List', switch_inline_query=title)],
             [
@@ -94,8 +102,8 @@ def main():
     dispatcher.add_handler(CallbackQueryHandler(response))
     dispatcher.add_error_handler(error)
     dispatcher.add_handler(MessageHandler(Filters.text, orderList))
+#   dispatcher.add_handler(MessageHandler(Filters.text, phoneNumber))
     dispatcher.add_handler(InlineQueryHandler(inlineOrderList))
-
     updater.start_polling()
     updater.idle()
 
