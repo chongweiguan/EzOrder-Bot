@@ -1,8 +1,8 @@
 class backEnd:
-    def __init__(self, OrderLists, CheckLists, SplitLists):
+    def __init__(self, OrderLists, CheckLists, SplitList):
         self.OrderLists = OrderLists
         self.CheckLists = CheckLists
-        self.SplitLists = SplitLists
+        self.SplitLists = SplitList
         self.Ordering = False
         self.Checking = False
         self.Splitting = False

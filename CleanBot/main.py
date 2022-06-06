@@ -35,7 +35,7 @@ def prompts(update: Update, context: CallbackContext):
             backEnd.OrderLists[len(backEnd.OrderLists)-1].Title == "":
         backEnd.OrderLists[len(backEnd.OrderLists)-1].Title = update.message.text
         TITLE_ARRAY.append(update.message.text)
-        update.message.reply_text('What is your phone number?')
+        update.message.reply_text('What is your phone number? ')
         return
 
     if backEnd.OrderLists[len(backEnd.OrderLists)-1].phoneNum == "":
@@ -121,7 +121,7 @@ def AddingOrder(update: Update, context: CallbackContext) -> None:
     added_order = update.message.text
 
     backEnd.OrderLists[int(inlineChat[0].message)].peopleList.append(user_name)
-    backEnd.OrderLists[int(inlineChat[0].message)].orders.append(added_order)
+    backEnd.OrderLists[int(inlineChat[0].message)].orderList.append(added_order)
     text = backEnd.OrderLists[int(inlineChat[0].message)].fullList()
 
     ORDER_BUTTONS = [
