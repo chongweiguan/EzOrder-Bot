@@ -20,7 +20,7 @@ def startCommand(update: Update, context: CallbackContext) -> None:
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text("Hi! I am EzOrder Bot, I am here to make your life a little bit"
+    update.message.reply_text("Hi! I am EzOrder Bot, I am here to make your life a little bit "
                               "easier Here are some commands to interact with me!",
                               reply_markup=reply_markup)
 
