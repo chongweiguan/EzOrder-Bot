@@ -2,11 +2,12 @@ from telegram.ext import *
 from telegram import *
 from backEnd import backEnd
 from OrderList import OrderList
+from Secrets import API_Token, Bot_URL
 
-updater = Updater(token='5316303881:AAEIysIUYoZ45d1EwN_5Jl6dGonJfv_ZE8g')
+updater = Updater(token=API_Token)
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = 'https://t.me/ezezezezezorderbot'
+botURL = Bot_URL
 backEnd = backEnd([], [], [])
 TITLE_ARRAY = []
 inlineChat = []
