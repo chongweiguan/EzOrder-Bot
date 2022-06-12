@@ -13,6 +13,8 @@ Originalbot = []
 Originalbot.append("")
 inlineChat = []
 inlineChat.append("")
+orderIndex = []
+orderIndex.append("")
 
 def startCommand(update: Update, context: CallbackContext) -> None:
     keyboard = [
@@ -23,9 +25,14 @@ def startCommand(update: Update, context: CallbackContext) -> None:
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text("Hi! I am EzOrder Bot, I am here to make your life a little bit"
+    if backEnd.Adding == True:
+        update.message.reply_text("Adding Order for: \n\n" + backEnd.OrderLists[orderIndex[0]].fullList())
+        update.message.reply_text("What is your Order?")
+    else:
+        update.message.reply_text("Hi! I am EzOrder Bot, I am here to make your life a little bit"
                               "easier Here are some commands to interact with me!",
                               reply_markup=reply_markup)
+
 
 def prompts(update: Update, context: CallbackContext):
     if backEnd.Ordering == False and backEnd.Checking == False and backEnd.Splitting == False and backEnd.Adding == False:
@@ -42,12 +49,9 @@ def prompts(update: Update, context: CallbackContext):
         backEnd.OrderLists[len(backEnd.OrderLists) - 1].phoneNum = update.message.text
         backEnd.Ordering = False
         Originalbot[0]=update
-        print(update)
         return orderList(update, context)
 
     if backEnd.Adding == True:
-        print(update)
-        print(inlineChat[0])
         return AddingOrder(update, context)
 
 
@@ -59,11 +63,11 @@ def response(update: Update, context: CallbackContext) -> None:
     if query.data == "New Order":
         return NewOrder(query,context)
     if query.data[0:9] == "Add Order":
-        update.message = query.data[9]
-        print(update)
-        index = int(query.data[9])
-        print(index)
-        return AddOrder(update, context, index)
+        update.message = query.data[9:]
+        index = int(query.data[9:])
+        orderIndex[0] = index
+        backEnd.Adding = True
+        inlineChat[0] = update
 
 def NewOrder(update: Update, context: CallbackContext) -> None:
     orderlist = OrderList("", "", [], [])
@@ -108,20 +112,19 @@ def inlineOrderList(update: Update, context: CallbackContext):
 
 def AddOrder(update: Update, _: CallbackContext, index) -> None:
     inlineChat[0] = update
-    Originalbot[0].message.reply_text("Adding Order for: \n\n" + backEnd.OrderLists[index].fullList())
-    Originalbot[0].message.reply_text("What is your Order?")
-    backEnd.Adding = True
-    backEnd.OrderLists[index].addOrder = True
+    #Originalbot[0].message.reply_text("Adding Order for: \n\n" + backEnd.OrderLists[index].fullList())
+    #Originalbot[0].message.reply_text("What is your Order?")
+    #backEnd.Adding = True
+    #backEnd.OrderLists[index].addOrder = True
 
 def AddingOrder(update: Update, context: CallbackContext) -> None:
 
     Originalbot[0] = update
-    print(update)
     user_name = f'{update.message.from_user.first_name}'
     added_order = update.message.text
 
-    backEnd.OrderLists[int(inlineChat[0].message)].peopleList.append(user_name)
-    backEnd.OrderLists[int(inlineChat[0].message)].orderList.append(added_order)
+    backEnd.OrderLists[orderIndex[0]].peopleList.append(user_name)
+    backEnd.OrderLists[orderIndex[0]].orders.append(added_order)
     text = backEnd.OrderLists[int(inlineChat[0].message)].fullList()
 
     ORDER_BUTTONS = [
@@ -136,6 +139,7 @@ def AddingOrder(update: Update, context: CallbackContext) -> None:
         text=text,
         reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
     )
+    backEnd.Adding = False
 
 
 

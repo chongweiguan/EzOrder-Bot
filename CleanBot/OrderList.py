@@ -1,9 +1,9 @@
 class OrderList:
-    def __init__(self, phoneNum, Title, peopleList, orderList):
+    def __init__(self, phoneNum, Title, peopleList, orders):
         self.phoneNum = phoneNum
         self.Title = Title
         self.peopleList = peopleList
-        self.orders = orderList
+        self.orders = orders
         self.addOrder = False
         self.editOrder = False
         self.copyOrder = False
