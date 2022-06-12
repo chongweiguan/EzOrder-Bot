@@ -9,8 +9,6 @@ START_MESSAGE = 'This bot will help you create an order list, check your outstan
 botURL = 'https://t.me/ezezezezezorderbot'
 backEnd = backEnd([], [], [])
 TITLE_ARRAY = []
-Originalbot = []
-Originalbot.append("")
 inlineChat = []
 inlineChat.append("")
 orderIndex = []
@@ -48,7 +46,6 @@ def prompts(update: Update, context: CallbackContext):
     if backEnd.OrderLists[len(backEnd.OrderLists)-1].phoneNum == "":
         backEnd.OrderLists[len(backEnd.OrderLists) - 1].phoneNum = update.message.text
         backEnd.Ordering = False
-        Originalbot[0]=update
         return orderList(update, context)
 
     if backEnd.Adding == True:
@@ -110,16 +107,7 @@ def inlineOrderList(update: Update, context: CallbackContext):
           )
     update.inline_query.answer(results)
 
-def AddOrder(update: Update, _: CallbackContext, index) -> None:
-    inlineChat[0] = update
-    #Originalbot[0].message.reply_text("Adding Order for: \n\n" + backEnd.OrderLists[index].fullList())
-    #Originalbot[0].message.reply_text("What is your Order?")
-    #backEnd.Adding = True
-    #backEnd.OrderLists[index].addOrder = True
-
 def AddingOrder(update: Update, context: CallbackContext) -> None:
-
-    Originalbot[0] = update
     user_name = f'{update.message.from_user.first_name}'
     added_order = update.message.text
 
