@@ -1,6 +1,5 @@
 from telegram import *
 from telegram.ext import *
-from Creator import Creator
 from OrderList import OrderList
 from backEnd import backEnd
 from user import User
@@ -10,11 +9,9 @@ dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
 botURL = 'https://t.me/ezezezezezorderbot'
 backEnd = backEnd([], [], [])
-TITLE_ARRAY = []
-inlineChat = []
-inlineChat.append("")
-orderIndex = []
-orderIndex.append("")
+inlineChat = [""]
+orderIndex = [""]
+listId = 1
 
 
 def startCommand(update: Update, context: CallbackContext) -> None:
@@ -33,31 +30,41 @@ def startCommand(update: Update, context: CallbackContext) -> None:
 
 def addCommand(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
-    if backEnd.OrderLists[orderIndex[0]].checkAdding(int(userId)):
+    user = backEnd.getUser(userId)
+
+    if user is None or not user.Adding:
+        update.message.reply_text("To use this command click Add Order on an active Order List")
+    if user.Adding:
+        user.addingCommand = True
         update.message.reply_text("Adding Order for: \n\n" + backEnd.OrderLists[orderIndex[0]].fullList())
         update.message.reply_text("What is your Order?")
 
 
+
 def prompts(update: Update, context: CallbackContext):
-    # if user.Ordering == False and user.Adding == False:
-    #    update.message.reply_text(START_MESSAGE)
-
     userId = update.message.from_user.id
+    user = backEnd.getUser(userId)
 
-    if backEnd.OrderLists[len(backEnd.OrderLists) - 1].phoneNum == "" and \
-            backEnd.OrderLists[len(backEnd.OrderLists) - 1].Title == "":
-        backEnd.OrderLists[len(backEnd.OrderLists) - 1].Title = update.message.text
-        TITLE_ARRAY.append(update.message.text)
+    if user is None or (user.Adding == False and user.Ordering == False):
+        update.message.reply_text(START_MESSAGE)
+        return
+
+    if user.addingCommand:
+        return AddingOrder(update, context)
+
+    if backEnd.latestList(userId).phoneNum == "" and \
+            backEnd.latestList(userId).Title == "":
+        backEnd.latestList(userId).Title = update.message.text
+        user.titleList.append(update.message.text)
         update.message.reply_text('What is your phone number? ')
         return
 
-    if backEnd.OrderLists[len(backEnd.OrderLists) - 1].phoneNum == "":
-        backEnd.OrderLists[len(backEnd.OrderLists) - 1].phoneNum = update.message.text
-        backEnd.OrderLists[len(backEnd.OrderLists) - 1].creator.ordering = False
+    if backEnd.latestList(userId).phoneNum == "":
+        backEnd.latestList(userId).phoneNum = update.message.text
+        backEnd.getUser(userId).ordering = False
         return orderList(update, context)
 
-    if backEnd.OrderLists[orderIndex[0]].checkAdding(userId):
-        return AddingOrder(update, context)
+
 
 
 def response(update: Update, context: CallbackContext) -> None:
@@ -71,22 +78,33 @@ def response(update: Update, context: CallbackContext) -> None:
         index = int(query.data[9:])
         orderIndex[0] = index
         inlineChat[0] = update
-        # instantiate a user object and add it to the usersList dictionary in OrderList
+        # check if user is in backend, if not add the user in. Then add the orderList into the user
+        # change users.adding to true
         userId = update.callback_query.from_user.id
-        user = User(userId)
-        user.Adding = True
-        backEnd.OrderLists[orderIndex[0]].usersList[userId] = user
-
+        if not backEnd.isUser(userId):
+            backEnd.addUser(userId)
+        currentUser = backEnd.getUser(userId)
+        currentList = backEnd.OrderLists[orderIndex[0]]
+        currentUser.Adding = True
+        currentUser.memberLists[orderIndex[0]] = currentList
 
 
 def NewOrder(update: Update, context: CallbackContext) -> None:
-    # instantiate a Creator and a OrderList and add the OrderList to BackEnd
-    creatorId = update.message.from_user.id
-    creator = Creator(creatorId)
-    creator.Ordering = True
-    orderlist = OrderList("", "", [], [], {}, creator)
-    orderlist.usersList[creatorId] = creator
-    backEnd.OrderLists.append(orderlist)
+    # instantiate a user and set the users Ordering to True
+    userId = update.message.chat.id
+    backEnd.addUser(userId)
+    user = backEnd.getUser(userId)
+    user.Ordering = True
+    # instantiate a OrderList and add it to backend
+    global listId
+    orderingList = OrderList(listId, "", "", [], [])
+    backEnd.OrderLists.append(orderingList)
+    # add the orderList to the users creators list
+    user.creatorLists.append(orderingList)
+    listId += 1
+    # add the user to backend userList if not inside alr
+
+
     update.message.reply_text('What will the title of your Order List be?')
 
 
@@ -108,8 +126,12 @@ def orderList(update: Update, context: CallbackContext) -> None:
 
 
 def inlineOrderList(update: Update, context: CallbackContext):
+    userId = update.inline_query.from_user.id
+    user = backEnd.getUser(userId)
+
     results = []
-    for title in TITLE_ARRAY:
+
+    for title in user.titleList:
         index = backEnd.getOrderIndex(title)
         ORDER_BUTTONS = [
             [InlineKeyboardButton('Add Order', callback_data='Add Order' + str(index))],
@@ -131,13 +153,14 @@ def inlineOrderList(update: Update, context: CallbackContext):
 def AddingOrder(update: Update, context: CallbackContext) -> None:
     user_name = f'{update.message.from_user.first_name}'
     added_order = update.message.text
+    userId = update.message.from_user.id
 
     backEnd.OrderLists[orderIndex[0]].peopleList.append(user_name)
     backEnd.OrderLists[orderIndex[0]].orders.append(added_order)
     text = backEnd.OrderLists[int(inlineChat[0].message)].fullList()
 
     ORDER_BUTTONS = [
-        [InlineKeyboardButton('Add Order', callback_data='Add Order' + (inlineChat[0].message))],
+        [InlineKeyboardButton('Add Order', callback_data='Add Order' + inlineChat[0].message)],
         [InlineKeyboardButton('Edit Order', callback_data='Edit Order')],
         [InlineKeyboardButton('Copy Order', callback_data='Copy Order')],
         [InlineKeyboardButton('Bot Chat', url=botURL)]
@@ -148,7 +171,8 @@ def AddingOrder(update: Update, context: CallbackContext) -> None:
         text=text,
         reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
     )
-    backEnd.Adding = False
+    backEnd.getUser(userId).Adding = False
+    backEnd.getUser(userId).addingCommand = False
 
 
 def error(update, context):
