@@ -109,9 +109,11 @@ def NewOrder(update: Update, context: CallbackContext) -> None:
 
 
 def orderList(update: Update, context: CallbackContext) -> None:
+    userId = update.message.from_user.id
+
     keyboard = [
         [InlineKeyboardButton('Publish Order List',
-                              switch_inline_query=backEnd.OrderLists[len(backEnd.OrderLists) - 1].Title)],
+                              switch_inline_query=backEnd.latestList(userId).Title)],
         [
             InlineKeyboardButton('Close Order', callback_data='Close Order'),
             InlineKeyboardButton('Open Order', callback_data='Open Order')
@@ -119,7 +121,7 @@ def orderList(update: Update, context: CallbackContext) -> None:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text(
-        text=backEnd.OrderLists[len(backEnd.OrderLists) - 1].fullList(),
+        text=backEnd.latestList(userId).fullList(),
         reply_markup=reply_markup,
         disable_web_page_preview=True
     )
