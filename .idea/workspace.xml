@@ -5,11 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c295f8b2-08fc-4908-bae2-ae171ccc3bf6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/CleanBot/Creator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CleanBot/user.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CleanBot/OrderList.py" beforeDir="false" afterPath="$PROJECT_DIR$/CleanBot/OrderList.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CleanBot/backEnd.py" beforeDir="false" afterPath="$PROJECT_DIR$/CleanBot/backEnd.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CleanBot/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/CleanBot/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CleanBot/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/CleanBot/user.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,12 +30,12 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
