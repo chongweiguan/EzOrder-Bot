@@ -1,12 +1,11 @@
 class OrderList:
 
-    def __init__(self, phoneNum, Title, peopleList, orders, usersList, creator):
-        self.creator = creator
+    def __init__(self, listId, phoneNum, Title, peopleList, orders):
+        self.listId = listId
         self.phoneNum = phoneNum
         self.Title = Title
         self.peopleList = peopleList
         self.orders = orders
-        self.usersList = usersList
         self.addOrder = False
         self.editOrder = False
         self.copyOrder = False
@@ -26,10 +25,10 @@ class OrderList:
         return text
 
     # function that takes in a userId and returns whether that user.adding is true or false
-    def checkAdding(self, id):
-        if id in self.usersList == False:
-            return False
-        elif not self.usersList[id].Adding:
-            return False
-        else:
-            return True
+    # def checkAdding(self, id):
+    #     if id in self.usersList == False:
+    #         return False
+    #     elif not self.usersList[id].Adding:
+    #         return False
+    #     else:
+    #         return True
