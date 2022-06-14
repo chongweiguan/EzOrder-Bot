@@ -16,6 +16,8 @@ class User:
         self.deletingCommand = False
         self.Editing = False
         self.editingCommand = False
+        self.Copying = False
+        self.copyingCommand = False
 
     def isAdding(self):
         return self.Adding
