@@ -58,6 +58,17 @@ def deleteCommand(update: Update, context: CallbackContext) -> None:
         return
     if user.Deleting:
         user.deletingCommand = True
+        keyboard = [
+            [
+                InlineKeyboardButton("Yes", callback_data="YesDelete"),
+                InlineKeyboardButton("No", callback_data="NoDelete"),
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.message.reply_text(
+            "Are you sure you want to delete your order from '" + backEnd.OrderLists[user.listID].Title + "' ?"
+            + "\n\n" + backEnd.OrderLists[user.listID].getOrder(user_name),
+            reply_markup=reply_markup)
 
 
 def editCommand(update: Update, context: CallbackContext) -> None:
