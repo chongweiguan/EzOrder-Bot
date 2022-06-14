@@ -35,4 +35,10 @@ class OrderList:
                 return "" + self.peopleList[i] +" - " + self.orders[i]
         return "no such order"
 
+    def getOnlyOrder(self, name):
+        for i in range(len(self.peopleList)):
+            if name == self.peopleList[i]:
+                return self.orders[i]
+        return "no such order"
+
 
