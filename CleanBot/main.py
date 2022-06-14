@@ -173,6 +173,11 @@ def AddingOrder(update: Update, context: CallbackContext) -> None:
     backEnd.getUser(userId).Adding = False
     backEnd.getUser(userId).addingCommand = False
 
+def copyOrder(update: Update, context: CallbackContext) -> None:
+    print(update)
+    print("This is just a test")
+
+
 
 def error(update, context):
     print(f"Update {update} caused error {context.error}")
