@@ -29,9 +29,14 @@ def startCommand(update: Update, context: CallbackContext) -> None:
 def addCommand(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
     user = backEnd.getUser(userId)
+    user_name = f'{update.message.from_user.first_name}'
 
     if user is None or not user.Adding:
         update.message.reply_text("To use this command click Add Order on an active Order List")
+        return
+    if user_name in backEnd.OrderLists[user.addingID].peopleList:
+        update.message.reply_text("You have already added your order!")
+        return
     if user.Adding:
         user.addingCommand = True
         update.message.reply_text("Adding Order for: \n\n" + backEnd.OrderLists[user.addingID].fullList())
@@ -132,10 +137,17 @@ def inlineOrderList(update: Update, context: CallbackContext):
     for title in user.titleList:
         index = backEnd.getOrderIndex(title)
         ORDER_BUTTONS = [
-            [InlineKeyboardButton('Add Order', callback_data='Add Order' + str(index))],
-            [InlineKeyboardButton('Edit Order', callback_data='Edit Order')],
-            [InlineKeyboardButton('Copy Order', callback_data='Copy Order')],
-            [InlineKeyboardButton('Bot Chat', url=botURL)]
+            [
+                InlineKeyboardButton('Add Order', callback_data='Add Order' + str(index)),
+                InlineKeyboardButton('Edit Order', callback_data='Edit Order')
+            ],
+            [
+                InlineKeyboardButton('Copy Order', callback_data='Copy Order'),
+                InlineKeyboardButton('Delete Order', callback_data='Delete Order')
+            ],
+            [
+                InlineKeyboardButton('Bot Chat', url=botURL)
+            ]
         ]
         results.append(
             InlineQueryResultArticle(
@@ -159,10 +171,17 @@ def AddingOrder(update: Update, context: CallbackContext) -> None:
     text = backEnd.OrderLists[int(user.addingUpdate.message)].fullList()
 
     ORDER_BUTTONS = [
-        [InlineKeyboardButton('Add Order', callback_data='Add Order' + user.addingUpdate.message)],
-        [InlineKeyboardButton('Edit Order', callback_data='Edit Order')],
-        [InlineKeyboardButton('Copy Order', callback_data='Copy Order')],
-        [InlineKeyboardButton('Bot Chat', url=botURL)]
+        [
+            InlineKeyboardButton('Add Order', callback_data='Add Order' + user.addingUpdate.message),
+            InlineKeyboardButton('Edit Order', callback_data='Edit Order')
+        ],
+        [
+            InlineKeyboardButton('Copy Order', callback_data='Copy Order'),
+            InlineKeyboardButton('Delete Order', callback_data='Delete Order')
+        ],
+        [
+            InlineKeyboardButton('Bot Chat', url=botURL)
+        ]
     ]
 
     update.message.reply_text(text)
@@ -173,7 +192,7 @@ def AddingOrder(update: Update, context: CallbackContext) -> None:
     backEnd.getUser(userId).Adding = False
     backEnd.getUser(userId).addingCommand = False
 
-def copyOrder(update: Update, context: CallbackContext) -> None:
+def deleteOrder(update: Update, context: CallbackContext) -> None:
     print(update)
     print("This is just a test")
 
