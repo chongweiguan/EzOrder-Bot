@@ -35,11 +35,4 @@ class OrderList:
                 return "" + self.peopleList[i] +" - " + self.orders[i]
         return "no such order"
 
-    # function that takes in a userId and returns whether that user.adding is true or false
-    # def checkAdding(self, id):
-    #     if id in self.usersList == False:
-    #         return False
-    #     elif not self.usersList[id].Adding:
-    #         return False
-    #     else:
-    #         return True
+
