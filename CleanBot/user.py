@@ -7,11 +7,13 @@ class User:
         self.memberLists = {}
         self.creatorLists = []
         self.titleList = []
-        self.addingID = 0
-        self.addingUpdate = ''
+        self.listID = 0
+        self.listUpdate = ''
         self.Adding = False
         self.Ordering = False
         self.addingCommand = False
+        self.Deleting = False
+        self.deletingCommand = False
 
     def isAdding(self):
         return self.Adding
