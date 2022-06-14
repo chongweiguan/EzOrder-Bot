@@ -1,10 +1,10 @@
 from user import User
 
 class backEnd:
-    def __init__(self, OrderLists, CheckLists, SplitList):
-        self.OrderLists = OrderLists
-        self.CheckLists = CheckLists
-        self.SplitLists = SplitList
+    def __init__(self):
+        self.OrderLists = []
+        self.CheckLists = []
+        self.SplitLists = []
         self.userLists = {}
         self.Ordering = False
         self.Checking = False
@@ -35,3 +35,8 @@ class backEnd:
     def isUser(self, userId):
         return userId in self.userLists
 
+
+    def getCreatorIndex(self, userID):
+        for i in range(len(self.CreatorList)):
+            if userID == self.CreatorList[i].id:
+                return i

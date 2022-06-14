@@ -7,6 +7,8 @@ class User:
         self.memberLists = {}
         self.creatorLists = []
         self.titleList = []
+        self.addingID = 0
+        self.addingUpdate = ''
         self.Adding = False
         self.Ordering = False
         self.addingCommand = False
