@@ -232,14 +232,7 @@ def response(update: Update, context: CallbackContext) -> None:
     # could cause some bugs since user since getUser returns none
     if not query.data[0:3] == "135":
         userId = update.callback_query.message.chat.id
-        print(update)
-        print(update.callback_query)
-        print(update.callback_query.message)
-        print(update.callback_query.from_user)
-        print(userId)
         user = backEnd.getUser(userId)
-        print(backEnd.userLists)
-        print(user)
         index = user.listID
         order = backEnd.OrderLists[index]
         orderPeople = order.peopleList
@@ -421,12 +414,12 @@ def deleteOrder(update: Update, context: CallbackContext) -> None:
     currentUser.deletingCommand = False
 
 def copyOrder(name, update: Update, context: CallbackContext) -> None:
-    user_name = f'{update.message.from_user.first_name}'
-    userId = update.message.from_user.id
+    user_name = f'{update.from_user.first_name}'
+    userId = update.from_user.id
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
     ordList = backEnd.OrderLists[index]
-    order = ordList.getOrder(name)
+    order = ordList.getOnlyOrder(name)
 
     ordList.peopleList.append(user_name)
     ordList.orders.append(order)
