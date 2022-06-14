@@ -316,8 +316,8 @@ def editingOrder(update: Update, context: CallbackContext) -> None:
     currentUser.editingCommand = False
 
 def deleteOrder(update: Update, context: CallbackContext) -> None:
-    user_name = f'{update.message.from_user.first_name}'
-    userId = update.message.from_user.id #correct userID
+    user_name = f'{update.from_user.first_name}'
+    userId = update.from_user.id  # correct userID
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
     order = backEnd.OrderLists[index]
