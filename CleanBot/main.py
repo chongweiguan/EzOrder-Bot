@@ -244,17 +244,26 @@ def response(update: Update, context: CallbackContext) -> None:
         userId = update.callback_query.from_user.id
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
-        #currentUser.listUpdate = update
+        # currentUser.listUpdate = update
         return updateList(update, context)
 
     if query.data[0:14] == "135Close Order":
         update.message = query.data[14:]
         index = int(query.data[14:])
+        userId = update.callback_query.message.chat.id
+        currentUser = backEnd.getUser(userId)
+        currentUser.listID = index
+        # currentUser.listUpdate = update
+        return closedOrder(update, context)
+
+    if query.data[0:7] == "135Paid":
+        update.message = query.data[7:]
+        index = int(query.data[7:])
         userId = update.callback_query.from_user.id
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
-        #currentUser.listUpdate = update
-        return closedOrder(update, context)
+        return paid(update, context)
+
 
 def newOrder(update: Update, context: CallbackContext) -> None:
     # instantiate a user and set the users Ordering to True
@@ -279,7 +288,6 @@ def updateList(update: Update, context: CallbackContext) -> None:
     index = int(user.listUpdate.message)
     order = backEnd.OrderLists[index]
 
-
     keyboard = [
         [
             InlineKeyboardButton('Publish Order List',
@@ -299,6 +307,7 @@ def updateList(update: Update, context: CallbackContext) -> None:
         reply_markup=reply_markup,
         disable_web_page_preview=True
     )
+
 
 def orderList(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
@@ -391,6 +400,7 @@ def addingOrder(update: Update, context: CallbackContext) -> None:
     backEnd.getUser(userId).addingCommand = False
     return
 
+
 def editingOrder(update: Update, context: CallbackContext) -> None:
     user_name = f'{update.message.from_user.first_name}'
     userId = update.message.from_user.id  # correct userID
@@ -463,6 +473,7 @@ def deleteOrder(update: Update, context: CallbackContext) -> None:
     currentUser.Deleting = False
     currentUser.deletingCommand = False
 
+
 def copyOrder(name, update: Update, context: CallbackContext) -> None:
     user_name = f'{update.from_user.first_name}'
     userId = update.from_user.id
@@ -497,18 +508,45 @@ def copyOrder(name, update: Update, context: CallbackContext) -> None:
     backEnd.getUser(userId).Copying = False
     backEnd.getUser(userId).copyingCommand = False
 
+
 def closedOrder(update: Update, context: CallbackContext) -> None:
-    userId = update.callback_query.from_user.id #correct userID
+    userId = update.callback_query.message.chat.id  # correct userID
     user = backEnd.getUser(userId)
     currentListUpdate = user.listUpdate
-    text = backEnd.OrderLists[user.listID].fullList()
+    text = backEnd.OrderLists[user.listID].paymentList()
+    index = user.listID
+
+
 
     BUTTONS = [
         [
-            InlineKeyboardButton('Paid', callback_data='Paid'),
+            InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
         ]
-        ]
+    ]
     currentListUpdate.callback_query.edit_message_text(
+        text=text,
+        reply_markup=InlineKeyboardMarkup(BUTTONS)
+    )
+
+
+def paid(update: Update, context: CallbackContext) -> None:
+    user_name = f'{update.callback_query.from_user.first_name}'
+    userId = update.callback_query.from_user.id  # correct userID
+    currentUser = backEnd.getUser(userId)
+    index = currentUser.listID
+    order = backEnd.OrderLists[index]
+    listIndex = order.getIndex(user_name)
+
+    order.peopleList.pop(listIndex)
+    order.orders.pop(listIndex)
+    text = order.paymentList()
+
+    BUTTONS = [
+        [
+            InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
+        ]
+    ]
+    currentUser.listUpdate.callback_query.edit_message_text(
         text=text,
         reply_markup=InlineKeyboardMarkup(BUTTONS)
     )

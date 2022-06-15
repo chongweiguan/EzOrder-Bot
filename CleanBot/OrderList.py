@@ -29,6 +29,14 @@ class OrderList:
 
         return text
 
+    def paymentList(self):
+        text = "Order closed! \nTransfer " + self.phoneNum + " for " + \
+               self.Title + "! \n\n\nOrders will be removed once you click the Paid button: "
+        for i in range(len(self.peopleList)):
+            text = text + "\n" + self.peopleList[i] + " - " + self.orders[i]
+
+        return text
+
     def getOrder(self, name):
         for i in range(len(self.peopleList)):
             if name == self.peopleList[i]:
