@@ -163,7 +163,7 @@ def response(update: Update, context: CallbackContext) -> None:
     if query.data == "135New Order":
         return newOrder(query, context)
 
-    if query.data[0:12] == "135Add Order":
+    elif query.data[0:12] == "135Add Order":
         update.message = query.data[12:]
         index = int(query.data[12:])
         # check if user is in backend, if not add the user in. Then add the orderList into the user
@@ -178,7 +178,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser.Adding = True
         currentUser.memberLists[index] = currentList
 
-    if query.data[0:15] == "135Delete Order":
+    elif query.data[0:15] == "135Delete Order":
         update.message = query.data[15:]
         index = int(query.data[15:])
         # check if user is in backend, if not add the user in. Then add the orderList into the user
@@ -193,13 +193,13 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser.Deleting = True
         currentUser.memberLists[index] = currentList
 
-    if query.data == "135NoDelete":
+    elif query.data == "135NoDelete":
         query.message.reply_text("Ok we shall leave your order there!")
 
-    if query.data == "135YesDelete":
+    elif query.data == "135YesDelete":
         return deleteOrder(query, context)
 
-    if query.data[0:13] == "135Edit Order":
+    elif query.data[0:13] == "135Edit Order":
         update.message = query.data[13:]
         index = int(query.data[13:])
         # check if user is in backend, if not add the user in. Then add the orderList into the user
@@ -214,7 +214,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser.Editing = True
         currentUser.memberLists[index] = currentList
 
-    if query.data[0:13] == "135Copy Order":
+    elif query.data[0:13] == "135Copy Order":
         update.message = query.data[13:]
         index = int(query.data[13:])
         # check if user is in backend, if not add the user in. Then add the orderList into the user
@@ -230,15 +230,26 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser.memberLists[index] = currentList
 
     # could cause some bugs since user since getUser returns none
-    if not query.data[0:3] == "135":
+    elif not query.data[0:3] == "135":
         userId = update.callback_query.message.chat.id
         user = backEnd.getUser(userId)
         index = user.listID
         order = backEnd.OrderLists[index]
         orderPeople = order.peopleList
-        for x in orderPeople:
-            if query.data == x:
-                copyOrder(x, query, context)
+        if user.Copying and user.copyingCommand:
+            for x in orderPeople:
+                if query.data == x:
+                    copyOrder(x, query, context)
+        else:
+            query.message.reply_text("To copy someone's order, go to an active Order List click the Copy Order Button"
+                                     + "then type /copy to me")
+
+    else:
+        userId = update.callback_query.message.chat.id
+        backEnd.getUser(userId).Copying = False
+        backEnd.getUser(userId).copyingCommand = False
+        query.message.reply_text("User has deleted his order")
+
 
 def newOrder(update: Update, context: CallbackContext) -> None:
     # instantiate a user and set the users Ordering to True
