@@ -256,6 +256,15 @@ def response(update: Update, context: CallbackContext) -> None:
         # currentUser.listUpdate = update
         return closedOrder(update, context)
 
+    if query.data[0:13] == "135Open Order":
+        update.message = query.data[13:]
+        index = int(query.data[13:])
+        userId = update.callback_query.message.chat.id
+        currentUser = backEnd.getUser(userId)
+        currentUser.listID = index
+        # currentUser.listUpdate = update
+        return openOrder(update, context)
+
     if query.data[0:7] == "135Paid":
         update.message = query.data[7:]
         index = int(query.data[7:])
@@ -515,14 +524,43 @@ def closedOrder(update: Update, context: CallbackContext) -> None:
     currentListUpdate = user.listUpdate
     text = backEnd.OrderLists[user.listID].paymentList()
     index = user.listID
-
-
+    title = backEnd.OrderLists[index].Title
 
     BUTTONS = [
         [
             InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
         ]
     ]
+    update.callback_query.message.reply_text("Order List " + "'" + title + "'" + "is now closed")
+    currentListUpdate.callback_query.edit_message_text(
+        text=text,
+        reply_markup=InlineKeyboardMarkup(BUTTONS)
+    )
+
+def openOrder(update: Update, context: CallbackContext) -> None:
+    userId = update.callback_query.message.chat.id  # correct userID
+    currentUser = backEnd.getUser(userId)
+    currentListUpdate = currentUser.listUpdate
+    index = currentUser.listID
+    order = backEnd.OrderLists[index]
+    title = order.Title
+    text = order.fullList()
+
+    BUTTONS = [
+        [
+            InlineKeyboardButton('Add Order', callback_data='135Add Order' + currentUser.listUpdate.message),
+            InlineKeyboardButton('Edit Order', callback_data='135Edit Order' + currentUser.listUpdate.message)
+        ],
+        [
+            InlineKeyboardButton('Copy Order', callback_data='135Copy Order' + currentUser.listUpdate.message),
+            InlineKeyboardButton('Delete Order', callback_data='135Delete Order' + currentUser.listUpdate.message)
+        ],
+        [
+            InlineKeyboardButton('Bot Chat', url=botURL)
+        ]
+    ]
+
+    update.callback_query.message.reply_text("Order List " + "'" + title + "'" + "is now opened")
     currentListUpdate.callback_query.edit_message_text(
         text=text,
         reply_markup=InlineKeyboardMarkup(BUTTONS)
