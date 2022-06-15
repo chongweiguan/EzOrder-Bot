@@ -9,6 +9,7 @@ class User:
         self.titleList = []
         self.listID = 0
         self.listUpdate = ''
+        self.personalUpdate = ''
         self.Adding = False
         self.Ordering = False
         self.addingCommand = False

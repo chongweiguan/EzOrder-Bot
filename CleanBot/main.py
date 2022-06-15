@@ -4,15 +4,20 @@ from OrderList import OrderList
 from backEnd import backEnd
 from user import User
 
-updater = Updater('5316303881:AAEIysIUYoZ45d1EwN_5Jl6dGonJfv_ZE8g')
+updater = Updater('5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = 'https://t.me/ezezezezezorderbot'
+botURL = 'https://t.me/ezordertest_bot'
 backEnd = backEnd()
 listId = 1
 
 
 def startCommand(update: Update, context: CallbackContext) -> None:
+    userId = update.message.from_user.id
+    if not backEnd.isUser(userId):
+        backEnd.addUser(userId)
+    user = backEnd.getUser(userId)
+    user.personalUpdate = update
     keyboard = [
         [
             InlineKeyboardButton("New Order", callback_data="135New Order"),
@@ -40,7 +45,6 @@ def addCommand(update: Update, context: CallbackContext) -> None:
         return
     if user.Adding:
         user.addingCommand = True
-        #update.message.reply_text("Adding Order for: \n\n" + backEnd.OrderLists[user.listID].fullList())
         update.message.reply_text("Adding Order for: " + backEnd.OrderLists[user.listID].Title)
         update.message.reply_text("What is your Order?")
 
@@ -178,6 +182,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentList = backEnd.OrderLists[index]
         currentUser.Adding = True
         currentUser.memberLists[index] = currentList
+        return addCommand(currentUser.personalUpdate, context)
 
     if query.data[0:15] == "135Delete Order":
         update.message = query.data[15:]
@@ -193,6 +198,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentList = backEnd.OrderLists[index]
         currentUser.Deleting = True
         currentUser.memberLists[index] = currentList
+        return deleteCommand(currentUser.personalUpdate, context)
 
     if query.data == "135NoDelete":
         query.message.reply_text("Ok we shall leave your order there!")
@@ -214,6 +220,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentList = backEnd.OrderLists[index]
         currentUser.Editing = True
         currentUser.memberLists[index] = currentList
+        return editCommand(currentUser.personalUpdate, context)
 
     if query.data[0:13] == "135Copy Order":
         update.message = query.data[13:]
@@ -229,6 +236,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentList = backEnd.OrderLists[index]
         currentUser.Copying = True
         currentUser.memberLists[index] = currentList
+        return copyCommand(currentUser.personalUpdate, context)
 
     if query.data[0:9] == "135Update":
         return updateList(update, context)
@@ -370,7 +378,7 @@ def addingOrder(update: Update, context: CallbackContext) -> None:
     )
     backEnd.getUser(userId).Adding = False
     backEnd.getUser(userId).addingCommand = False
-
+    return
 
 def editingOrder(update: Update, context: CallbackContext) -> None:
     user_name = f'{update.message.from_user.first_name}'
