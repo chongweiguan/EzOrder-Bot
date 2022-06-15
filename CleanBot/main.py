@@ -4,10 +4,10 @@ from OrderList import OrderList
 from backEnd import backEnd
 from user import User
 
-updater = Updater('5316303881:AAEIysIUYoZ45d1EwN_5Jl6dGonJfv_ZE8g')
+updater = Updater('5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = 'https://t.me/ezezezezezorderbot'
+botURL = 'https://t.me/ezordertest_bot'
 backEnd = backEnd()
 listId = 1
 
@@ -239,20 +239,22 @@ def response(update: Update, context: CallbackContext) -> None:
         return copyCommand(currentUser.personalUpdate, context)
 
     if query.data[0:9] == "135Update":
+        update.message = query.data[9:]
+        index = int(query.data[9:])
+        userId = update.callback_query.from_user.id
+        currentUser = backEnd.getUser(userId)
+        currentUser.listID = index
+        #currentUser.listUpdate = update
         return updateList(update, context)
 
-    # could cause some bugs since user since getUser returns none
-    if not query.data[0:3] == "135":
-        userId = update.callback_query.message.chat.id
-        user = backEnd.getUser(userId)
-        index = user.listID
-        order = backEnd.OrderLists[index]
-        orderPeople = order.peopleList
-        for x in orderPeople:
-            if query.data == x:
-                copyOrder(x, query, context)
-            else:
-                update.message.reply_text("order unavailable!")
+    if query.data[0:14] == "135Close Order":
+        update.message = query.data[14:]
+        index = int(query.data[14:])
+        userId = update.callback_query.from_user.id
+        currentUser = backEnd.getUser(userId)
+        currentUser.listID = index
+        #currentUser.listUpdate = update
+        return closedOrder(update, context)
 
 def newOrder(update: Update, context: CallbackContext) -> None:
     # instantiate a user and set the users Ordering to True
@@ -270,43 +272,50 @@ def newOrder(update: Update, context: CallbackContext) -> None:
     # add the user to backend userList if not inside alr
     update.message.reply_text('What will the title of your Order List be?')
 
+
 def updateList(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.from_user.id
+    user = backEnd.getUser(userId)
+    index = int(user.listUpdate.message)
+    order = backEnd.OrderLists[index]
+
 
     keyboard = [
         [
             InlineKeyboardButton('Publish Order List',
-                              switch_inline_query=backEnd.latestList(userId).Title)
+                                 switch_inline_query=order.Title)
         ],
         [
-            InlineKeyboardButton('Update', callback_data = '135Update')
-         ],
+            InlineKeyboardButton('Update', callback_data='135Update' + str(index))
+        ],
         [
-            InlineKeyboardButton('Close Order', callback_data='135Close Order'),
-            InlineKeyboardButton('Open Order', callback_data='135Open Order')
+            InlineKeyboardButton('Close Order', callback_data='135Close Order' + str(index)),
+            InlineKeyboardButton('Open Order', callback_data='135Open Order' + str(index))
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.callback_query.edit_message_text(
-        text=backEnd.latestList(userId).fullList(),
+        text=order.fullList(),
         reply_markup=reply_markup,
         disable_web_page_preview=True
     )
 
 def orderList(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
+    currTitle = backEnd.latestList(userId).Title
+    index = backEnd.getOrderIndex(currTitle)
 
     keyboard = [
         [
             InlineKeyboardButton('Publish Order List',
-                              switch_inline_query=backEnd.latestList(userId).Title)
+                                 switch_inline_query=currTitle)
         ],
         [
-            InlineKeyboardButton('Update', callback_data = '135Update')
-         ],
+            InlineKeyboardButton('Update', callback_data='135Update' + str(index))
+        ],
         [
-            InlineKeyboardButton('Close Order', callback_data='135Close Order'),
-            InlineKeyboardButton('Open Order', callback_data='135Open Order')
+            InlineKeyboardButton('Close Order', callback_data='135Close Order' + str(index)),
+            InlineKeyboardButton('Open Order', callback_data='135Open Order' + str(index))
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -487,6 +496,23 @@ def copyOrder(name, update: Update, context: CallbackContext) -> None:
     )
     backEnd.getUser(userId).Copying = False
     backEnd.getUser(userId).copyingCommand = False
+
+def closedOrder(update: Update, context: CallbackContext) -> None:
+    userId = update.callback_query.from_user.id #correct userID
+    user = backEnd.getUser(userId)
+    currentListUpdate = user.listUpdate
+    text = backEnd.OrderLists[user.listID].fullList()
+
+    BUTTONS = [
+        [
+            InlineKeyboardButton('Paid', callback_data='Paid'),
+        ]
+        ]
+    currentListUpdate.callback_query.edit_message_text(
+        text=text,
+        reply_markup=InlineKeyboardMarkup(BUTTONS)
+    )
+
 
 def error(update, context):
     print(f"Update {update} caused error {context.error}")
