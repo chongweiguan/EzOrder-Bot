@@ -242,7 +242,7 @@ def response(update: Update, context: CallbackContext) -> None:
                     copyOrder(x, query, context)
         else:
             query.message.reply_text("To copy someone's order, go to an active Order List click the Copy Order Button"
-                                     + "then type /copy to me")
+                                     + " then type /copy to me")
 
     else:
         userId = update.callback_query.message.chat.id
