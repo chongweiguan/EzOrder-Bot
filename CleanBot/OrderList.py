@@ -6,6 +6,7 @@ class OrderList:
         self.Title = Title
         self.peopleList = peopleList
         self.orders = orders
+        self.unpaid = {}
         self.groupChatListUpdate = ''
         self.addOrder = False
         self.editOrder = False
@@ -33,8 +34,8 @@ class OrderList:
     def paymentList(self):
         text = "Order closed! \nTransfer " + self.phoneNum + " for " + \
                self.Title + "! \n\n\nOrders will be removed once you click the Paid button: "
-        for i in range(len(self.peopleList)):
-            text = text + "\n" + self.peopleList[i] + " - " + self.orders[i]
+        for k, v in self.unpaid.items():
+            text += "\n" + k + " - " + v
 
         return text
 
