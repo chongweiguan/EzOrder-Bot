@@ -180,6 +180,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser.listID = index
         currentUser.listUpdate = update
         currentList = backEnd.OrderLists[index]
+        currentList.groupChatListUpdate = update
         currentUser.Adding = True
         currentUser.memberLists[index] = currentList
         return addCommand(currentUser.personalUpdate, context)
@@ -196,6 +197,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser.listID = index
         currentUser.listUpdate = update
         currentList = backEnd.OrderLists[index]
+        currentList.groupChatListUpdate = update
         currentUser.Deleting = True
         currentUser.memberLists[index] = currentList
         return deleteCommand(currentUser.personalUpdate, context)
@@ -218,6 +220,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser.listID = index
         currentUser.listUpdate = update
         currentList = backEnd.OrderLists[index]
+        currentList.groupChatListUpdate = update
         currentUser.Editing = True
         currentUser.memberLists[index] = currentList
         return editCommand(currentUser.personalUpdate, context)
@@ -234,6 +237,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser.listID = index
         currentUser.listUpdate = update
         currentList = backEnd.OrderLists[index]
+        currentList.groupChatListUpdate = update
         currentUser.Copying = True
         currentUser.memberLists[index] = currentList
         return copyCommand(currentUser.personalUpdate, context)
@@ -253,6 +257,8 @@ def response(update: Update, context: CallbackContext) -> None:
         userId = update.callback_query.message.chat.id
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
+        print("testing 1")
+        print(update)
         # currentUser.listUpdate = update
         return closedOrder(update, context)
 
@@ -262,6 +268,8 @@ def response(update: Update, context: CallbackContext) -> None:
         userId = update.callback_query.message.chat.id
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
+        print("testing 2")
+        print(update)
         # currentUser.listUpdate = update
         return openOrder(update, context)
 
@@ -521,17 +529,19 @@ def copyOrder(name, update: Update, context: CallbackContext) -> None:
 def closedOrder(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.message.chat.id  # correct userID
     user = backEnd.getUser(userId)
-    currentListUpdate = user.listUpdate
-    text = backEnd.OrderLists[user.listID].paymentList()
-    index = user.listID
-    title = backEnd.OrderLists[index].Title
+    orderIndex = int(update.message)
+    currentOrder = backEnd.OrderLists[orderIndex]
+    currentListUpdate = currentOrder.groupChatListUpdate
+    text = backEnd.OrderLists[orderIndex].paymentList()
+    #index = user.listID
+    title = backEnd.OrderLists[orderIndex].Title
 
     BUTTONS = [
         [
-            InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
+            InlineKeyboardButton('Paid', callback_data='135Paid' + str(orderIndex)),
         ]
     ]
-    update.callback_query.message.reply_text("Order List " + "'" + title + "'" + "is now closed")
+    update.callback_query.message.reply_text("Order List " + "'" + title + "'" + " is now closed")
     currentListUpdate.callback_query.edit_message_text(
         text=text,
         reply_markup=InlineKeyboardMarkup(BUTTONS)
@@ -540,11 +550,11 @@ def closedOrder(update: Update, context: CallbackContext) -> None:
 def openOrder(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.message.chat.id  # correct userID
     currentUser = backEnd.getUser(userId)
-    currentListUpdate = currentUser.listUpdate
-    index = currentUser.listID
-    order = backEnd.OrderLists[index]
-    title = order.Title
-    text = order.fullList()
+    orderIndex = int(update.message)
+    currentOrder = backEnd.OrderLists[orderIndex]
+    currentListUpdate = currentOrder.groupChatListUpdate
+    text = backEnd.OrderLists[orderIndex].fullList()
+    title = backEnd.OrderLists[orderIndex].Title
 
     BUTTONS = [
         [

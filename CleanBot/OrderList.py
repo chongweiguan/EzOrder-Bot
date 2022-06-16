@@ -6,6 +6,7 @@ class OrderList:
         self.Title = Title
         self.peopleList = peopleList
         self.orders = orders
+        self.groupChatListUpdate = ''
         self.addOrder = False
         self.editOrder = False
         self.copyOrder = False
