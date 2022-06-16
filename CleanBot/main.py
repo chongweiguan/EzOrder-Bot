@@ -4,12 +4,12 @@ from OrderList import OrderList
 from backEnd import backEnd
 from user import User
 
-updater = Updater('5316303881:AAEIysIUYoZ45d1EwN_5Jl6dGonJfv_ZE8g')
+updater = Updater('5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = 'https://t.me/ezezezezezorderbot'
+botURL = 'https://t.me/ezordertest_bot'
 backEnd = backEnd()
-listId = 1
+listId = 0
 
 
 def startCommand(update: Update, context: CallbackContext) -> None:
@@ -602,7 +602,10 @@ def paid(update: Update, context: CallbackContext) -> None:
     )
 
 def check(update: Update, context: CallbackContext) -> None:
+    print(update)
     userId = update.from_user.id
+    user_name = f'{update.from_user.first_name}'
+    print(user_name)
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
     order = backEnd.OrderLists[index]
@@ -611,8 +614,11 @@ def check(update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton('Update', callback_data='135CheckUpdate' + str(index)),
         ]
     ]
+
+    text = "Who owes you money 😤💵\n\n" + currentUser.outstandingOrders() + \
+           "\nPeople you owe money to 🥺💵\n\n" + currentUser.outstandingPayments(user_name)
     update.message.reply_text(
-        text="these are your outstanding payments\n\n" + currentUser.outstandingOrders(),
+        text=text,
         reply_markup = InlineKeyboardMarkup(BUTTONS)
     )
 
