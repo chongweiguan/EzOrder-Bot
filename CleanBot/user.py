@@ -27,6 +27,24 @@ class User:
         text = ""
         for i in range(len(self.creatorLists)):
             if len(self.creatorLists[i].unpaid) != 0:
-                text = text + self.creatorLists[i].getCheckList() + "\n\n"
+                text = text + self.creatorLists[i].getCheckList() + "\n"
         return text
+
+    def outstandingPayments(self, name):
+        text = ""
+        orderIndexes = []
+        orderLists = []
+        for key in self.memberLists.keys():
+            orderIndexes.append(int(key))
+        for val in self.memberLists.values():
+            orderLists.append(val)
+        print("als good")
+        for i in range(len(orderLists)):
+            print(orderLists[i].unpaid.keys())
+            if name in orderLists[i].unpaid.keys():
+                print("yes")
+                text = text + orderLists[i].Title + "\n" + orderLists[i].getOrder(name)
+
+        return text
+
 
