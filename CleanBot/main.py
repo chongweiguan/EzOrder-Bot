@@ -388,6 +388,7 @@ def addingOrder(update: Update, context: CallbackContext) -> None:
 
     backEnd.OrderLists[user.listID].peopleList.append(user_name)
     backEnd.OrderLists[user.listID].orders.append(added_order)
+    backEnd.OrderLists[user.listID].unpaid[user_name] = added_order
     text = backEnd.OrderLists[int(user.listUpdate.message)].fullList()
 
     ORDER_BUTTONS = [
@@ -425,8 +426,10 @@ def editingOrder(update: Update, context: CallbackContext) -> None:
 
     order.peopleList.pop(listIndex)
     order.orders.pop(listIndex)
+    order.unpaid.pop(user_name)
     order.peopleList.append(user_name)
     order.orders.append(editedOrder)
+    order.unpaid[user_name] = editedOrder
     text = backEnd.OrderLists[int(currentUser.listUpdate.message)].fullList()
 
     ORDER_BUTTONS = [
@@ -462,6 +465,7 @@ def deleteOrder(update: Update, context: CallbackContext) -> None:
 
     order.peopleList.pop(listIndex)
     order.orders.pop(listIndex)
+    order.unpaid.pop(user_name)
     text = order.fullList()
 
     ORDER_BUTTONS = [
@@ -497,6 +501,7 @@ def copyOrder(name, update: Update, context: CallbackContext) -> None:
 
     ordList.peopleList.append(user_name)
     ordList.orders.append(order)
+    ordList.unpaid[user_name] = order
     text = backEnd.OrderLists[int(currentUser.listUpdate.message)].fullList()
 
     ORDER_BUTTONS = [
@@ -579,10 +584,8 @@ def paid(update: Update, context: CallbackContext) -> None:
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
     order = backEnd.OrderLists[index]
-    listIndex = order.getIndex(user_name)
 
-    order.peopleList.pop(listIndex)
-    order.orders.pop(listIndex)
+    order.unpaid.pop(user_name)
     text = order.paymentList()
 
     BUTTONS = [
