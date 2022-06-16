@@ -587,6 +587,7 @@ def paid(update: Update, context: CallbackContext) -> None:
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
     order = backEnd.OrderLists[index]
+    currentListUpdate = order.groupChatListUpdate
 
     order.unpaid.pop(user_name)
     text = order.paymentList()
@@ -596,7 +597,7 @@ def paid(update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
         ]
     ]
-    currentUser.listUpdate.callback_query.edit_message_text(
+    currentListUpdate.callback_query.edit_message_text(
         text=text,
         reply_markup=InlineKeyboardMarkup(BUTTONS)
     )
