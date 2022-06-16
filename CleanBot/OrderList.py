@@ -1,11 +1,11 @@
 class OrderList:
 
-    def __init__(self, listId, phoneNum, Title, peopleList, orders):
+    def __init__(self, listId):
         self.listId = listId
-        self.phoneNum = phoneNum
-        self.Title = Title
-        self.peopleList = peopleList
-        self.orders = orders
+        self.phoneNum = ""
+        self.Title = ""
+        self.peopleList = []
+        self.orders = []
         self.unpaid = {}
         self.groupChatListUpdate = ''
         self.addOrder = False
@@ -23,6 +23,18 @@ class OrderList:
         for i in range(len(self.peopleList)):
             if name == self.peopleList[i]:
                 return i
+
+    def getCheckList(self):
+        text = self.Title
+        keys = []
+        vals = []
+        for key in self.unpaid.keys():
+            keys.append(key)
+        for val in self.unpaid.values():
+            vals.append(val)
+        for i in range(len(keys)):
+            text = text + "\n" + keys[i] + " - " + vals[i] + "\n"
+        return text
 
     def fullList(self):
         text = "Collating orders for " + self.Title + "! \nPayLah to " + self.phoneNum + "\n\n\nOrders:"

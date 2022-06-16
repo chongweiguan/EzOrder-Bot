@@ -22,3 +22,11 @@ class User:
 
     def isAdding(self):
         return self.Adding
+
+    def outstandingOrders(self):
+        text = ""
+        for i in range(len(self.creatorLists)):
+            if len(self.creatorLists[i].unpaid) != 0:
+                text = text + self.creatorLists[i].getCheckList() + "\n\n"
+        return text
+

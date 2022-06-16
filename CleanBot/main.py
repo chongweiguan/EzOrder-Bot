@@ -4,10 +4,10 @@ from OrderList import OrderList
 from backEnd import backEnd
 from user import User
 
-updater = Updater('5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
+updater = Updater('5316303881:AAEIysIUYoZ45d1EwN_5Jl6dGonJfv_ZE8g')
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = 'https://t.me/ezordertest_bot'
+botURL = 'https://t.me/ezezezezezorderbot'
 backEnd = backEnd()
 listId = 1
 
@@ -168,6 +168,9 @@ def response(update: Update, context: CallbackContext) -> None:
     if query.data == "135New Order":
         return newOrder(query, context)
 
+    if query.data == "135Check":
+        return check(query, context)
+
     if query.data[0:12] == "135Add Order":
         update.message = query.data[12:]
         index = int(query.data[12:])
@@ -286,7 +289,7 @@ def newOrder(update: Update, context: CallbackContext) -> None:
     user.Ordering = True
     # instantiate a OrderList and add it to backend
     global listId
-    orderingList = OrderList(listId, "", "", [], [])
+    orderingList = OrderList(listId)
     backEnd.OrderLists.append(orderingList)
     # add the orderList to the users creators list
     user.creatorLists.append(orderingList)
@@ -597,6 +600,24 @@ def paid(update: Update, context: CallbackContext) -> None:
         text=text,
         reply_markup=InlineKeyboardMarkup(BUTTONS)
     )
+
+def check(update: Update, context: CallbackContext) -> None:
+    userId = update.from_user.id
+    currentUser = backEnd.getUser(userId)
+    index = currentUser.listID
+    order = backEnd.OrderLists[index]
+    BUTTONS = [
+        [
+            InlineKeyboardButton('Update', callback_data='135CheckUpdate' + str(index)),
+        ]
+    ]
+    update.message.reply_text(
+        text="these are your outstanding payments\n\n" + currentUser.outstandingOrders(),
+        reply_markup = InlineKeyboardMarkup(BUTTONS)
+    )
+
+
+
 
 
 def error(update, context):
