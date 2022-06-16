@@ -257,8 +257,6 @@ def response(update: Update, context: CallbackContext) -> None:
         userId = update.callback_query.message.chat.id
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
-        print("testing 1")
-        print(update)
         # currentUser.listUpdate = update
         return closedOrder(update, context)
 
@@ -268,8 +266,6 @@ def response(update: Update, context: CallbackContext) -> None:
         userId = update.callback_query.message.chat.id
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
-        print("testing 2")
-        print(update)
         # currentUser.listUpdate = update
         return openOrder(update, context)
 
