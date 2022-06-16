@@ -616,10 +616,6 @@ def check(update: Update, context: CallbackContext) -> None:
         reply_markup = InlineKeyboardMarkup(BUTTONS)
     )
 
-
-
-
-
 def error(update, context):
     print(f"Update {update} caused error {context.error}")
 
