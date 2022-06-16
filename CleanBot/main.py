@@ -290,6 +290,7 @@ def newOrder(update: Update, context: CallbackContext) -> None:
     # instantiate a OrderList and add it to backend
     global listId
     orderingList = OrderList(listId)
+    orderingList.ownerName = update.from_user.first_name
     backEnd.OrderLists.append(orderingList)
     # add the orderList to the users creators list
     user.creatorLists.append(orderingList)
@@ -391,7 +392,8 @@ def addingOrder(update: Update, context: CallbackContext) -> None:
 
     backEnd.OrderLists[user.listID].peopleList.append(user_name)
     backEnd.OrderLists[user.listID].orders.append(added_order)
-    backEnd.OrderLists[user.listID].unpaid[user_name] = added_order
+    if user_name != backEnd.OrderLists[user.listID].ownerName:
+        backEnd.OrderLists[user.listID].unpaid[user_name] = added_order
     text = backEnd.OrderLists[int(user.listUpdate.message)].fullList()
 
     ORDER_BUTTONS = [
@@ -429,10 +431,12 @@ def editingOrder(update: Update, context: CallbackContext) -> None:
 
     order.peopleList.pop(listIndex)
     order.orders.pop(listIndex)
-    order.unpaid.pop(user_name)
+    if user_name != order.ownerName:
+        order.unpaid.pop(user_name)
     order.peopleList.append(user_name)
     order.orders.append(editedOrder)
-    order.unpaid[user_name] = editedOrder
+    if user_name != order.ownerName:
+        order.unpaid[user_name] = editedOrder
     text = backEnd.OrderLists[int(currentUser.listUpdate.message)].fullList()
 
     ORDER_BUTTONS = [
@@ -468,7 +472,8 @@ def deleteOrder(update: Update, context: CallbackContext) -> None:
 
     order.peopleList.pop(listIndex)
     order.orders.pop(listIndex)
-    order.unpaid.pop(user_name)
+    if user_name != order.ownerName:
+        order.unpaid.pop(user_name)
     text = order.fullList()
 
     ORDER_BUTTONS = [
@@ -504,7 +509,8 @@ def copyOrder(name, update: Update, context: CallbackContext) -> None:
 
     ordList.peopleList.append(user_name)
     ordList.orders.append(order)
-    ordList.unpaid[user_name] = order
+    if user_name != ordList.ownerName:
+        ordList.unpaid[user_name] = order
     text = backEnd.OrderLists[int(currentUser.listUpdate.message)].fullList()
 
     ORDER_BUTTONS = [
@@ -603,10 +609,8 @@ def paid(update: Update, context: CallbackContext) -> None:
     )
 
 def check(update: Update, context: CallbackContext) -> None:
-    print(update)
     userId = update.from_user.id
     user_name = f'{update.from_user.first_name}'
-    print(user_name)
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
     order = backEnd.OrderLists[index]

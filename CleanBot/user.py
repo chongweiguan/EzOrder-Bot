@@ -38,12 +38,9 @@ class User:
             orderIndexes.append(int(key))
         for val in self.memberLists.values():
             orderLists.append(val)
-        print("als good")
         for i in range(len(orderLists)):
-            print(orderLists[i].unpaid.keys())
             if name in orderLists[i].unpaid.keys():
-                print("yes")
-                text = text + orderLists[i].Title + "\n" + orderLists[i].getOrder(name)
+                text = text + orderLists[i].ownerName + " for " + orderLists[i].Title + "\n" + orderLists[i].getOrder(name)
 
         return text
 

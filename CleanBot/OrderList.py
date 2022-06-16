@@ -2,6 +2,7 @@ class OrderList:
 
     def __init__(self, listId):
         self.listId = listId
+        self.ownerName = ""
         self.phoneNum = ""
         self.Title = ""
         self.peopleList = []
