@@ -280,6 +280,17 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser.listID = index
         return paid(update, context)
 
+    if not query.data[0:3] == "135":
+        userId = update.callback_query.message.chat.id
+        user = backEnd.getUser(userId)
+        index = user.listID
+        order = backEnd.OrderLists[index]
+        orderPeople = order.peopleList
+        if user.Copying and user.copyingCommand:
+            for x in orderPeople:
+                if query.data == x:
+                    copyOrder(x, query, context)
+
 
 def newOrder(update: Update, context: CallbackContext) -> None:
     # instantiate a user and set the users Ordering to True
@@ -381,6 +392,7 @@ def inlineOrderList(update: Update, context: CallbackContext):
                 reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS),
             )
         )
+    print(update)
     update.inline_query.answer(results)
 
 
