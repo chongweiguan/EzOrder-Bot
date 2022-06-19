@@ -34,7 +34,7 @@ def startCommand(update: Update, context: CallbackContext) -> None:
 def addCommand(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
     user = backEnd.getUser(userId)
-    user_name = f'{update.message.from_user.first_name}'
+    user_name = f'{update.message.from_user.username}'
 
     if user is None or not user.Adding:
         update.message.reply_text("To use this command click Add Order on an active Order List")
@@ -52,7 +52,7 @@ def addCommand(update: Update, context: CallbackContext) -> None:
 def deleteCommand(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
     user = backEnd.getUser(userId)
-    user_name = f'{update.message.from_user.first_name}'
+    user_name = f'{update.message.from_user.username}'
 
     if user is None or not user.Deleting:
         update.message.reply_text("To use this command click Delete Order on an active Order List")
@@ -80,7 +80,7 @@ def deleteCommand(update: Update, context: CallbackContext) -> None:
 def editCommand(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
     user = backEnd.getUser(userId)
-    user_name = f'{update.message.from_user.first_name}'
+    user_name = f'{update.message.from_user.username}'
 
     if user is None or not user.Editing:
         update.message.reply_text("To use this command click Edit Order on an active Order List")
@@ -101,7 +101,7 @@ def editCommand(update: Update, context: CallbackContext) -> None:
 def copyCommand(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
     user = backEnd.getUser(userId)
-    user_name = f'{update.message.from_user.first_name}'
+    user_name = f'{update.message.from_user.username}'
     theOrder = backEnd.OrderLists[user.listID]
     thePeople = theOrder.peopleList
 
@@ -247,38 +247,60 @@ def response(update: Update, context: CallbackContext) -> None:
 
     if query.data[0:9] == "135Update":
         update.message = query.data[9:]
+        print(update)
         index = int(query.data[9:])
         userId = update.callback_query.from_user.id
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
-        # currentUser.listUpdate = update
+        currentUser.listUpdate = update
         return updateList(update, context)
 
     if query.data[0:14] == "135Close Order":
+
         update.message = query.data[14:]
         index = int(query.data[14:])
-        userId = update.callback_query.message.chat.id
-        currentUser = backEnd.getUser(userId)
-        currentUser.listID = index
-        # currentUser.listUpdate = update
-        return closedOrder(update, context)
+        order = backEnd.OrderLists[index]
+        length = len(order.peopleList)
+        if length == 0:
+            query.message.reply_text("Cannot close an empty Order List")
+        elif not order.orderStatus:
+            query.message.reply_text("Order List is already Closed")
+        else:
+            order.orderStatus = False
+            userId = update.callback_query.message.chat.id
+            currentUser = backEnd.getUser(userId)
+            currentUser.listID = index
+            # currentUser.listUpdate = update
+            return closedOrder(update, context)
 
     if query.data[0:13] == "135Open Order":
         update.message = query.data[13:]
         index = int(query.data[13:])
-        userId = update.callback_query.message.chat.id
-        currentUser = backEnd.getUser(userId)
-        currentUser.listID = index
-        # currentUser.listUpdate = update
-        return openOrder(update, context)
+        order = backEnd.OrderLists[index]
+        if order.orderStatus:
+            query.message.reply_text("Order List is already Opened")
+        else:
+            order.orderStatus = True
+            userId = update.callback_query.message.chat.id
+            currentUser = backEnd.getUser(userId)
+            currentUser.listID = index
+            # currentUser.listUpdate = update
+            return openOrder(update, context)
 
     if query.data[0:7] == "135Paid":
         update.message = query.data[7:]
         index = int(query.data[7:])
         userId = update.callback_query.from_user.id
+        username = update.callback_query.from_user.username
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
-        return paid(update, context)
+        order = backEnd.OrderLists[index]
+        if order.getOrder(username) == "no such order":
+            return
+        elif order.paidStatus(username):
+            return paid(update, context)
+        else:
+            return unpay(update, context)
 
     if not query.data[0:3] == "135":
         userId = update.callback_query.message.chat.id
@@ -301,7 +323,7 @@ def newOrder(update: Update, context: CallbackContext) -> None:
     # instantiate a OrderList and add it to backend
     global listId
     orderingList = OrderList(listId)
-    orderingList.ownerName = update.from_user.first_name
+    orderingList.ownerName = update.from_user.username
     backEnd.OrderLists.append(orderingList)
     # add the orderList to the users creators list
     user.creatorLists.append(orderingList)
@@ -314,6 +336,7 @@ def updateList(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.from_user.id
     user = backEnd.getUser(userId)
     index = int(user.listUpdate.message)
+    print(index)
     order = backEnd.OrderLists[index]
 
     keyboard = [
@@ -392,12 +415,11 @@ def inlineOrderList(update: Update, context: CallbackContext):
                 reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS),
             )
         )
-    print(update)
     update.inline_query.answer(results)
 
 
 def addingOrder(update: Update, context: CallbackContext) -> None:
-    user_name = f'{update.message.from_user.first_name}'
+    user_name = f'{update.message.from_user.username}'
     added_order = update.message.text
     userId = update.message.from_user.id
     user = backEnd.getUser(userId)
@@ -433,7 +455,7 @@ def addingOrder(update: Update, context: CallbackContext) -> None:
 
 
 def editingOrder(update: Update, context: CallbackContext) -> None:
-    user_name = f'{update.message.from_user.first_name}'
+    user_name = f'{update.message.from_user.username}'
     userId = update.message.from_user.id  # correct userID
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
@@ -475,7 +497,7 @@ def editingOrder(update: Update, context: CallbackContext) -> None:
 
 
 def deleteOrder(update: Update, context: CallbackContext) -> None:
-    user_name = f'{update.from_user.first_name}'
+    user_name = f'{update.from_user.username}'
     userId = update.from_user.id  # correct userID
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
@@ -512,7 +534,7 @@ def deleteOrder(update: Update, context: CallbackContext) -> None:
 
 
 def copyOrder(name, update: Update, context: CallbackContext) -> None:
-    user_name = f'{update.from_user.first_name}'
+    user_name = f'{update.from_user.username}'
     userId = update.from_user.id
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
@@ -549,13 +571,13 @@ def copyOrder(name, update: Update, context: CallbackContext) -> None:
 
 
 def closedOrder(update: Update, context: CallbackContext) -> None:
-    userId = update.callback_query.message.chat.id  # correct userID
-    user = backEnd.getUser(userId)
     orderIndex = int(update.message)
     currentOrder = backEnd.OrderLists[orderIndex]
+    userId = update.callback_query.message.chat.id  # correct userID
+    user = backEnd.getUser(userId)
     currentListUpdate = currentOrder.groupChatListUpdate
     text = backEnd.OrderLists[orderIndex].paymentList()
-    #index = user.listID
+    # index = user.listID
     title = backEnd.OrderLists[orderIndex].Title
 
     BUTTONS = [
@@ -568,6 +590,7 @@ def closedOrder(update: Update, context: CallbackContext) -> None:
         text=text,
         reply_markup=InlineKeyboardMarkup(BUTTONS)
     )
+
 
 def openOrder(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.message.chat.id  # correct userID
@@ -592,7 +615,7 @@ def openOrder(update: Update, context: CallbackContext) -> None:
         ]
     ]
 
-    update.callback_query.message.reply_text("Order List " + "'" + title + "'" + "is now opened")
+    update.callback_query.message.reply_text("Order List " + "'" + title + "'" + " is now opened")
     currentListUpdate.callback_query.edit_message_text(
         text=text,
         reply_markup=InlineKeyboardMarkup(BUTTONS)
@@ -600,7 +623,8 @@ def openOrder(update: Update, context: CallbackContext) -> None:
 
 
 def paid(update: Update, context: CallbackContext) -> None:
-    user_name = f'{update.callback_query.from_user.first_name}'
+    print(update)
+    user_name = f'{update.callback_query.from_user.username}'
     userId = update.callback_query.from_user.id  # correct userID
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
@@ -620,9 +644,33 @@ def paid(update: Update, context: CallbackContext) -> None:
         reply_markup=InlineKeyboardMarkup(BUTTONS)
     )
 
+
+def unpay(update: Update, context: CallbackContext) -> None:
+    user_name = f'{update.callback_query.from_user.username}'
+    userId = update.callback_query.from_user.id  # correct userID
+    currentUser = backEnd.getUser(userId)
+    index = currentUser.listID
+    order = backEnd.OrderLists[index]
+    currentListUpdate = order.groupChatListUpdate
+    userOrder = order.getOnlyOrder(user_name)
+
+    order.unpaid[user_name] = userOrder
+    text = order.paymentList()
+
+    BUTTONS = [
+        [
+            InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
+        ]
+    ]
+    currentListUpdate.callback_query.edit_message_text(
+        text=text,
+        reply_markup=InlineKeyboardMarkup(BUTTONS)
+    )
+
+
 def check(update: Update, context: CallbackContext) -> None:
     userId = update.from_user.id
-    user_name = f'{update.from_user.first_name}'
+    user_name = f'{update.from_user.username}'
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
     order = backEnd.OrderLists[index]
@@ -636,8 +684,9 @@ def check(update: Update, context: CallbackContext) -> None:
            "\nPeople you owe money to 🥺💵\n\n" + currentUser.outstandingPayments(user_name)
     update.message.reply_text(
         text=text,
-        reply_markup = InlineKeyboardMarkup(BUTTONS)
+        reply_markup=InlineKeyboardMarkup(BUTTONS)
     )
+
 
 def error(update, context):
     print(f"Update {update} caused error {context.error}")

@@ -9,6 +9,7 @@ class OrderList:
         self.orders = []
         self.unpaid = {}
         self.groupChatListUpdate = ''
+        self.orderStatus = True
         self.addOrder = False
         self.editOrder = False
         self.copyOrder = False
@@ -63,5 +64,12 @@ class OrderList:
             if name == self.peopleList[i]:
                 return self.orders[i]
         return "no such order"
+
+    def paidStatus(self, username):
+        if username in self.unpaid:
+            return True
+        else:
+            return False
+
 
 
