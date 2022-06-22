@@ -1,11 +1,14 @@
 class OrderList:
 
-    def __init__(self, listId):
+    def __init__(self, listId, timing):
         self.listId = listId
+        self.timing = timing[1:20]
         self.ownerName = ""
         self.phoneNum = ""
         self.Title = ""
         self.peopleList = []
+        #chat instance key, update value
+        self.updateList = {}
         self.orders = []
         self.unpaid = {}
         self.groupChatListUpdate = ''
@@ -39,7 +42,9 @@ class OrderList:
         return text
 
     def fullList(self):
-        text = "Collating orders for " + self.Title + "! \nPayLah to " + self.phoneNum + "\n\n\nOrders:"
+        warning = "If this is your first time using the bot, before doing anything, click the bot chat button " + \
+                  "followed by the Start button. Then head back to this chat to start using the buttons below!!\n\n"
+        text = warning + "Collating orders for " + self.Title + "! \nPayLah to " + self.phoneNum + "\n\n\nOrders:"
         for i in range(len(self.peopleList)):
             text = text + "\n" + self.peopleList[i] + " - " + self.orders[i]
 
@@ -71,5 +76,8 @@ class OrderList:
         else:
             return False
 
+    def addNewUpdate(self, update):
+        if update.chat_instance not in self.updateList:
+            self.updateList[update.chat_instance] = update
 
 

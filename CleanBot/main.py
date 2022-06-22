@@ -3,6 +3,8 @@ from telegram.ext import *
 from OrderList import OrderList
 from backEnd import backEnd
 from user import User
+from datetime import datetime
+import json
 
 updater = Updater('5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
 dispatcher = updater.dispatcher
@@ -13,6 +15,15 @@ listId = 0
 
 
 def startCommand(update: Update, context: CallbackContext) -> None:
+    userId = update.message.from_user.id
+    if not backEnd.isUser(userId):
+        backEnd.addUser(userId)
+    user = backEnd.getUser(userId)
+    user.personalUpdate = update
+    update.message.reply_text("The bot is now activated, you no longer have to activate it again!")
+
+
+def createCommand(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
     if not backEnd.isUser(userId):
         backEnd.addUser(userId)
@@ -172,38 +183,44 @@ def response(update: Update, context: CallbackContext) -> None:
         return check(query, context)
 
     if query.data[0:12] == "135Add Order":
-        update.message = query.data[12:]
-        index = int(query.data[12:])
-        # check if user is in backend, if not add the user in. Then add the orderList into the user
-        # change users.adding to true
         userId = update.callback_query.from_user.id
-        if not backEnd.isUser(userId):
-            backEnd.addUser(userId)
-        currentUser = backEnd.getUser(userId)
-        currentUser.listID = index
-        currentUser.listUpdate = update
-        currentList = backEnd.OrderLists[index]
-        currentList.groupChatListUpdate = update
-        currentUser.Adding = True
-        currentUser.memberLists[index] = currentList
-        return addCommand(currentUser.personalUpdate, context)
+        if backEnd.getUser(userId) is None:
+            return
+        else:
+            update.message = query.data[12:]
+            index = int(query.data[12:])
+            # check if user is in backend, if not add the user in. Then add the orderList into the user
+            # change users.adding to true
+            if not backEnd.isUser(userId):
+                backEnd.addUser(userId)
+            currentUser = backEnd.getUser(userId)
+            currentUser.listID = index
+            currentUser.listUpdate = update
+            currentList = backEnd.OrderLists[index]
+            currentList.groupChatListUpdate = update
+            currentUser.Adding = True
+            currentUser.memberLists[index] = currentList
+            return addCommand(currentUser.personalUpdate, context)
 
     if query.data[0:15] == "135Delete Order":
-        update.message = query.data[15:]
-        index = int(query.data[15:])
-        # check if user is in backend, if not add the user in. Then add the orderList into the user
-        # change users.adding to true
         userId = update.callback_query.from_user.id
-        if not backEnd.isUser(userId):
-            backEnd.addUser(userId)
-        currentUser = backEnd.getUser(userId)
-        currentUser.listID = index
-        currentUser.listUpdate = update
-        currentList = backEnd.OrderLists[index]
-        currentList.groupChatListUpdate = update
-        currentUser.Deleting = True
-        currentUser.memberLists[index] = currentList
-        return deleteCommand(currentUser.personalUpdate, context)
+        if backEnd.getUser(userId) is None:
+            return
+        else:
+            update.message = query.data[15:]
+            index = int(query.data[15:])
+            # check if user is in backend, if not add the user in. Then add the orderList into the user
+            # change users.adding to true
+            if not backEnd.isUser(userId):
+                backEnd.addUser(userId)
+            currentUser = backEnd.getUser(userId)
+            currentUser.listID = index
+            currentUser.listUpdate = update
+            currentList = backEnd.OrderLists[index]
+            currentList.groupChatListUpdate = update
+            currentUser.Deleting = True
+            currentUser.memberLists[index] = currentList
+            return deleteCommand(currentUser.personalUpdate, context)
 
     if query.data == "135NoDelete":
         query.message.reply_text("Ok we shall leave your order there!")
@@ -212,43 +229,49 @@ def response(update: Update, context: CallbackContext) -> None:
         return deleteOrder(query, context)
 
     if query.data[0:13] == "135Edit Order":
-        update.message = query.data[13:]
-        index = int(query.data[13:])
-        # check if user is in backend, if not add the user in. Then add the orderList into the user
-        # change users.adding to true
         userId = update.callback_query.from_user.id
-        if not backEnd.isUser(userId):
-            backEnd.addUser(userId)
-        currentUser = backEnd.getUser(userId)
-        currentUser.listID = index
-        currentUser.listUpdate = update
-        currentList = backEnd.OrderLists[index]
-        currentList.groupChatListUpdate = update
-        currentUser.Editing = True
-        currentUser.memberLists[index] = currentList
-        return editCommand(currentUser.personalUpdate, context)
+        if backEnd.getUser(userId) is None:
+            return
+        else:
+            update.message = query.data[13:]
+            index = int(query.data[13:])
+            # check if user is in backend, if not add the user in. Then add the orderList into the user
+            # change users.adding to true
+            if not backEnd.isUser(userId):
+                backEnd.addUser(userId)
+            currentUser = backEnd.getUser(userId)
+            currentUser.listID = index
+            currentUser.listUpdate = update
+            currentList = backEnd.OrderLists[index]
+            currentList.groupChatListUpdate = update
+            currentUser.Editing = True
+            currentUser.memberLists[index] = currentList
+            return editCommand(currentUser.personalUpdate, context)
 
     if query.data[0:13] == "135Copy Order":
-        update.message = query.data[13:]
-        index = int(query.data[13:])
-        # check if user is in backend, if not add the user in. Then add the orderList into the user
-        # change users.adding to true
         userId = update.callback_query.from_user.id
-        if not backEnd.isUser(userId):
-            backEnd.addUser(userId)
-        currentUser = backEnd.getUser(userId)
-        currentUser.listID = index
-        currentUser.listUpdate = update
-        currentList = backEnd.OrderLists[index]
-        currentList.groupChatListUpdate = update
-        currentUser.Copying = True
-        currentUser.memberLists[index] = currentList
-        return copyCommand(currentUser.personalUpdate, context)
+        if backEnd.getUser(userId) is None:
+            return
+        else:
+            update.message = query.data[13:]
+            index = int(query.data[13:])
+            # check if user is in backend, if not add the user in. Then add the orderList into the user
+            # change users.adding to true
+            if not backEnd.isUser(userId):
+                backEnd.addUser(userId)
+            currentUser = backEnd.getUser(userId)
+            currentUser.listID = index
+            currentUser.listUpdate = update
+            currentList = backEnd.OrderLists[index]
+            currentList.groupChatListUpdate = update
+            currentUser.Copying = True
+            currentUser.memberLists[index] = currentList
+            return copyCommand(currentUser.personalUpdate, context)
 
     if query.data[0:9] == "135Update":
         update.message = query.data[9:]
-        print(update)
         index = int(query.data[9:])
+        order = backEnd.OrderLists[index]
         userId = update.callback_query.from_user.id
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
@@ -288,19 +311,33 @@ def response(update: Update, context: CallbackContext) -> None:
             return openOrder(update, context)
 
     if query.data[0:7] == "135Paid":
-        update.message = query.data[7:]
-        index = int(query.data[7:])
         userId = update.callback_query.from_user.id
-        username = update.callback_query.from_user.username
+        if backEnd.getUser(userId) is None:
+            return
+        else:
+            update.message = query.data[7:]
+            index = int(query.data[7:])
+            username = update.callback_query.from_user.username
+            currentUser = backEnd.getUser(userId)
+            currentUser.listID = index
+            order = backEnd.OrderLists[index]
+            if order.getOrder(username) == "no such order":
+                return
+            elif order.ownerName == username:
+                return
+            elif order.paidStatus(username):
+                return paid(update, context)
+            else:
+                return unpay(update, context)
+
+    if query.data[0:9] == "135Remind":
+        update.message = query.data[9:]
+        index = int(query.data[9:])
+        order = backEnd.OrderLists[index]
+        userId = update.callback_query.message.chat.id
         currentUser = backEnd.getUser(userId)
         currentUser.listID = index
-        order = backEnd.OrderLists[index]
-        if order.getOrder(username) == "no such order":
-            return
-        elif order.paidStatus(username):
-            return paid(update, context)
-        else:
-            return unpay(update, context)
+        return reminder(update, context)
 
     if not query.data[0:3] == "135":
         userId = update.callback_query.message.chat.id
@@ -322,7 +359,9 @@ def newOrder(update: Update, context: CallbackContext) -> None:
     user.Ordering = True
     # instantiate a OrderList and add it to backend
     global listId
-    orderingList = OrderList(listId)
+    now = datetime.now()
+    stringNow = json.dumps(now, default=str)
+    orderingList = OrderList(listId, stringNow)
     orderingList.ownerName = update.from_user.username
     backEnd.OrderLists.append(orderingList)
     # add the orderList to the users creators list
@@ -336,7 +375,6 @@ def updateList(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.from_user.id
     user = backEnd.getUser(userId)
     index = int(user.listUpdate.message)
-    print(index)
     order = backEnd.OrderLists[index]
 
     keyboard = [
@@ -363,7 +401,7 @@ def updateList(update: Update, context: CallbackContext) -> None:
 def orderList(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
     currTitle = backEnd.latestList(userId).Title
-    index = backEnd.getOrderIndex(currTitle)
+    index = backEnd.latestList(userId).listId
 
     keyboard = [
         [
@@ -376,6 +414,9 @@ def orderList(update: Update, context: CallbackContext) -> None:
         [
             InlineKeyboardButton('Close Order', callback_data='135Close Order' + str(index)),
             InlineKeyboardButton('Open Order', callback_data='135Open Order' + str(index))
+        ],
+        [
+            InlineKeyboardButton('Remind!', callback_data='135Remind' + str(index))
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -392,8 +433,10 @@ def inlineOrderList(update: Update, context: CallbackContext):
 
     results = []
 
-    for title in user.titleList:
-        index = backEnd.getOrderIndex(title)
+    for x in range(len(user.creatorLists)):
+        order = user.creatorLists[x]
+        index = order.listId
+        title = order.Title
         ORDER_BUTTONS = [
             [
                 InlineKeyboardButton('Add Order', callback_data='135Add Order' + str(index)),
@@ -409,8 +452,9 @@ def inlineOrderList(update: Update, context: CallbackContext):
         ]
         results.append(
             InlineQueryResultArticle(
-                id=title,
+                id=index,
                 title=title,
+                description=order.timing,
                 input_message_content=InputTextMessageContent(backEnd.OrderLists[index].fullList()),
                 reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS),
             )
@@ -423,12 +467,14 @@ def addingOrder(update: Update, context: CallbackContext) -> None:
     added_order = update.message.text
     userId = update.message.from_user.id
     user = backEnd.getUser(userId)
+    order = backEnd.OrderLists[user.listID]
 
-    backEnd.OrderLists[user.listID].peopleList.append(user_name)
-    backEnd.OrderLists[user.listID].orders.append(added_order)
-    if user_name != backEnd.OrderLists[user.listID].ownerName:
-        backEnd.OrderLists[user.listID].unpaid[user_name] = added_order
+    order.peopleList.append(user_name)
+    order.orders.append(added_order)
+    if user_name != order.ownerName:
+        order.unpaid[user_name] = added_order
     text = backEnd.OrderLists[int(user.listUpdate.message)].fullList()
+    order.addNewUpdate(user.listUpdate.callback_query)
 
     ORDER_BUTTONS = [
         [
@@ -443,12 +489,12 @@ def addingOrder(update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton('Bot Chat', url=botURL)
         ]
     ]
-
     update.message.reply_text("Your order has been added!")
-    user.listUpdate.callback_query.edit_message_text(
-        text=text,
-        reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
-    )
+    for value in order.updateList.values():
+        value.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
+        )
     backEnd.getUser(userId).Adding = False
     backEnd.getUser(userId).addingCommand = False
     return
@@ -472,6 +518,7 @@ def editingOrder(update: Update, context: CallbackContext) -> None:
     if user_name != order.ownerName:
         order.unpaid[user_name] = editedOrder
     text = backEnd.OrderLists[int(currentUser.listUpdate.message)].fullList()
+    order.addNewUpdate(currentUser.listUpdate.callback_query)
 
     ORDER_BUTTONS = [
         [
@@ -488,10 +535,11 @@ def editingOrder(update: Update, context: CallbackContext) -> None:
     ]
 
     update.message.reply_text("Your Order has been Edited!")
-    currentUser.listUpdate.callback_query.edit_message_text(
-        text=text,
-        reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
-    )
+    for value in order.updateList.values():
+        value.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
+        )
     currentUser.Editing = False
     currentUser.editingCommand = False
 
@@ -509,6 +557,7 @@ def deleteOrder(update: Update, context: CallbackContext) -> None:
     if user_name != order.ownerName:
         order.unpaid.pop(user_name)
     text = order.fullList()
+    order.addNewUpdate(currentUser.listUpdate.callback_query)
 
     ORDER_BUTTONS = [
         [
@@ -525,10 +574,11 @@ def deleteOrder(update: Update, context: CallbackContext) -> None:
     ]
 
     update.message.reply_text("Your Order has been deleted!")
-    currentUser.listUpdate.callback_query.edit_message_text(
-        text=text,
-        reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
-    )
+    for value in order.updateList.values():
+        value.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
+        )
     currentUser.Deleting = False
     currentUser.deletingCommand = False
 
@@ -540,12 +590,14 @@ def copyOrder(name, update: Update, context: CallbackContext) -> None:
     index = currentUser.listID
     ordList = backEnd.OrderLists[index]
     order = ordList.getOnlyOrder(name)
+    orderObject = backEnd.OrderLists[index]
 
     ordList.peopleList.append(user_name)
     ordList.orders.append(order)
     if user_name != ordList.ownerName:
         ordList.unpaid[user_name] = order
     text = backEnd.OrderLists[int(currentUser.listUpdate.message)].fullList()
+    orderObject.addNewUpdate(currentUser.listUpdate.callback_query)
 
     ORDER_BUTTONS = [
         [
@@ -560,12 +612,12 @@ def copyOrder(name, update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton('Bot Chat', url=botURL)
         ]
     ]
-
-    update.message.reply_text(text)
-    currentUser.listUpdate.callback_query.edit_message_text(
-        text=text,
-        reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
-    )
+    update.message.reply_text("You have copied " + name + " order!")
+    for value in orderObject.updateList.values():
+        value.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
+        )
     backEnd.getUser(userId).Copying = False
     backEnd.getUser(userId).copyingCommand = False
 
@@ -586,10 +638,11 @@ def closedOrder(update: Update, context: CallbackContext) -> None:
         ]
     ]
     update.callback_query.message.reply_text("Order List " + "'" + title + "'" + " is now closed")
-    currentListUpdate.callback_query.edit_message_text(
-        text=text,
-        reply_markup=InlineKeyboardMarkup(BUTTONS)
-    )
+    for value in currentOrder.updateList.values():
+        value.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(BUTTONS)
+        )
 
 
 def openOrder(update: Update, context: CallbackContext) -> None:
@@ -616,14 +669,22 @@ def openOrder(update: Update, context: CallbackContext) -> None:
     ]
 
     update.callback_query.message.reply_text("Order List " + "'" + title + "'" + " is now opened")
-    currentListUpdate.callback_query.edit_message_text(
-        text=text,
-        reply_markup=InlineKeyboardMarkup(BUTTONS)
-    )
+    for value in currentOrder.updateList.values():
+        value.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(BUTTONS)
+        )
+
+
+def reminder(update: Update, context: CallbackContext) -> None:
+    orderIndex = int(update.message)
+    currentOrder = backEnd.OrderLists[orderIndex]
+    currentListUpdate = currentOrder.groupChatListUpdate
+    currentListUpdate.callback_query.id
+    return
 
 
 def paid(update: Update, context: CallbackContext) -> None:
-    print(update)
     user_name = f'{update.callback_query.from_user.username}'
     userId = update.callback_query.from_user.id  # correct userID
     currentUser = backEnd.getUser(userId)
@@ -639,10 +700,11 @@ def paid(update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
         ]
     ]
-    currentListUpdate.callback_query.edit_message_text(
-        text=text,
-        reply_markup=InlineKeyboardMarkup(BUTTONS)
-    )
+    for value in order.updateList.values():
+        value.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(BUTTONS)
+        )
 
 
 def unpay(update: Update, context: CallbackContext) -> None:
@@ -662,10 +724,11 @@ def unpay(update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
         ]
     ]
-    currentListUpdate.callback_query.edit_message_text(
-        text=text,
-        reply_markup=InlineKeyboardMarkup(BUTTONS)
-    )
+    for value in order.updateList.values():
+        value.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(BUTTONS)
+        )
 
 
 def check(update: Update, context: CallbackContext) -> None:
@@ -699,12 +762,12 @@ def cancel(update: Update, _: CallbackContext) -> None:
     backEnd.OrderLists = []
     backEnd.CheckLists = []
     backEnd.SplitLists = []
-    TITLE_ARRAY = []
     update.message.reply_text('Order List creation has been canceled.')
 
 
 def main():
     dispatcher.add_handler(CommandHandler("start", startCommand))
+    dispatcher.add_handler(CommandHandler("create", createCommand))
     dispatcher.add_handler(CommandHandler("cancel", cancel))
     dispatcher.add_handler(CommandHandler("add", addCommand))
     dispatcher.add_handler(CommandHandler("delete", deleteCommand))

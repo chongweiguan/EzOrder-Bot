@@ -11,12 +11,6 @@ class backEnd:
         self.Splitting = False
         self.Adding = False
 
-    def getOrderIndex(self, title):
-        for i in range(len(self.OrderLists)):
-            if title == self.OrderLists[i].Title:
-                return i
-        return len(self.OrderLists)
-
     def addUser(self, userId):
         if userId not in self.userLists:
             self.userLists[userId] = User(userId)
