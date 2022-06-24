@@ -19,6 +19,7 @@ class User:
         self.editingCommand = False
         self.Copying = False
         self.copyingCommand = False
+        self.Splitting = False
 
     def isAdding(self):
         return self.Adding
