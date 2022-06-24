@@ -17,6 +17,21 @@ class backEnd:
                 return i
         return len(self.OrderLists)
 
+    def getSplitIndex(self, title):
+        for i in range(len(self.SplitLists)):
+            if title == self.SplitLists[i].Title:
+                return i
+        return len(self.SplitLists)
+
+    def listType(self, title):
+        for i in range(len(self.SplitLists)):
+            if title == self.SplitLists[i].Title:
+                return "split"
+        for j in range(len(self.OrderLists)):
+            if title == self.OrderLists[j].Title:
+                return "order"
+        return len(self.OrderLists)
+
     def addUser(self, userId):
         if userId not in self.userLists:
             self.userLists[userId] = User(userId)
