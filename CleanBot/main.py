@@ -7,10 +7,10 @@ from user import User
 from datetime import datetime
 import json
 
-updater = Updater('5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
+updater = Updater('5316303881:AAEIysIUYoZ45d1EwN_5Jl6dGonJfv_ZE8g')
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = 'https://t.me/ezordertest_bot'
+botURL = 'https://t.me/ezezezezezorderbot'
 backEnd = backEnd()
 listId = 0
 splitListId = 0
