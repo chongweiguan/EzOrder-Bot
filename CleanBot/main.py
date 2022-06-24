@@ -550,6 +550,7 @@ def inlineOrderList(update: Update, context: CallbackContext):
                     input_message_content=InputTextMessageContent(backEnd.OrderLists[index].fullList()),
                     reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS),
                 )
+            )
         else:
             index = backEnd.getSplitIndex(title)
             currSplitList = backEnd.SplitLists[index]
