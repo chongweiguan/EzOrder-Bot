@@ -1,13 +1,17 @@
 class SplitList:
 
-    def __init__(self, listId):
+    def __init__(self, listId, timing, backEndId):
         self.listId = listId
+        self.backEndId = backEndId
         self.ownerName = ""
         self.phoneNum = ""
         self.Title = ""
         self.groupChatUpdate = ''
         self.items = {}
+        self.timing = timing[1:20]
         self.addPrice = False
+        self.orderStatus = True
+        self.canUpdate = False
 
     def addItem(self, item):
         price = ""
@@ -87,4 +91,10 @@ class SplitList:
                 text = text + vals[i][2][j] + "\n"
         text = text + "\n"
         return text
+
+    def isEmpty(self):
+        firstValue = list(self.items.values())[0]
+        contributors = firstValue[1]
+        return not contributors
+
 

@@ -23,12 +23,12 @@ class backEnd:
                 return i
         return len(self.SplitLists)
 
-    def listType(self, title):
+    def listType(self, backId):
         for i in range(len(self.SplitLists)):
-            if title == self.SplitLists[i].Title:
+            if backId == self.SplitLists[i].backEndId:
                 return "split"
         for j in range(len(self.OrderLists)):
-            if title == self.OrderLists[j].Title:
+            if backId == self.OrderLists[j].backEndId:
                 return "order"
         return len(self.OrderLists)
 

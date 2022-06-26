@@ -1,7 +1,8 @@
 class OrderList:
 
-    def __init__(self, listId, timing):
+    def __init__(self, listId, timing, backEndId):
         self.listId = listId
+        self.backEndId = backEndId
         self.timing = timing[1:20]
         self.ownerName = ""
         self.phoneNum = ""
@@ -17,6 +18,7 @@ class OrderList:
         self.editOrder = False
         self.copyOrder = False
         self.deleteOrder = False
+        self.canUpdate = False
 
     def addName(self, name):
         self.peopleList.append(name)

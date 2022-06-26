@@ -44,5 +44,3 @@ class User:
                 text = text + orderLists[i].ownerName + " for " + orderLists[i].Title + "\n" + orderLists[i].getOrder(name)
 
         return text
-
-
