@@ -172,13 +172,23 @@ def prompts(update: Update, context: CallbackContext):
                 backEnd.latestList(userId).Title == "":
             backEnd.latestList(userId).Title = update.message.text
             user.titleList.append(update.message.text)
-            update.message.reply_text('What is your phone number? ')
+            update.message.reply_text('What is your phone number?' +
+                                      ' (Send 1 if you do not want to display your phone number)')
             return
 
         if backEnd.latestList(userId).phoneNum == "":
-            backEnd.latestList(userId).phoneNum = update.message.text
-            backEnd.getUser(userId).Ordering = False
-            return orderList(update, context)
+            if update.message.text.isnumeric() and len(update.message.text) == 8:
+                backEnd.latestList(userId).phoneNum = update.message.text
+                backEnd.getUser(userId).Ordering = False
+                return orderList(update, context)
+            elif update.message.text == "1":
+                backEnd.latestList(userId).phoneNum = update.message.from_user.username
+                backEnd.getUser(userId).Ordering = False
+                return orderList(update, context)
+            else:
+                update.message.reply_text('Invalid Input: Please make sure that you have sent a 8 digit phone number'
+                                          + ' or 1')
+
 
     if user.Splitting:
         if backEnd.latestList(userId).phoneNum == "" and \
