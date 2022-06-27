@@ -197,25 +197,34 @@ def prompts(update: Update, context: CallbackContext):
             user.titleList.append(update.message.text)
             update.message.reply_text('What is your phone number? ')
             return
-        if backEnd.latestList(userId).phoneNum == "":
-            backEnd.latestList(userId).phoneNum = update.message.text
-            update.message.reply_text("Please send me your first item")
-            backEnd.latestList(userId).addPrice = True
-            return
-        if update.message.text != "/done" and backEnd.latestList(userId).addPrice == True:
+        elif backEnd.latestList(userId).phoneNum == "":
+            if update.message.text.isnumeric() and len(update.message.text) == 8:
+                backEnd.latestList(userId).phoneNum = update.message.text
+                update.message.reply_text("Please send me your first item")
+                backEnd.latestList(userId).addPrice = True
+                return
+            elif update.message.text == "1":
+                backEnd.latestList(userId).phoneNum = update.message.from_user.username
+                update.message.reply_text("Please send me your first item")
+                backEnd.latestList(userId).addPrice = True
+                return
+            else:
+                update.message.reply_text('Invalid Input: Please make sure that you have sent a 8 digit phone number'
+                                          + ' or 1')
+        elif update.message.text != "/done" and backEnd.latestList(userId).addPrice == True:
             backEnd.latestList(userId).addItem(update.message.text)
             update.message.reply_text("What is the price of this item?")
             backEnd.latestList(userId).addPrice = False
             return
-        if update.message.text != "/done" and backEnd.latestList(userId).addPrice == False:
+        elif update.message.text != "/done" and backEnd.latestList(userId).addPrice == False:
             if isfloat(update.message.text):
-                item = backEnd.latestList(userId).getLatestItem()[0] = update.message.text
+                backEnd.latestList(userId).getLatestItem()[0] = update.message.text
                 update.message.reply_text("Good. now send me another item, or /done to finish.")
                 backEnd.latestList(userId).addPrice = True
             else:
                 update.message.reply_text("Price has to be a number")
                 return
-        if update.message.text == "/done":
+        elif update.message.text == "/done":
             backEnd.latestList(userId).addPrice = False
             return splitList(update, context)
 
@@ -226,12 +235,18 @@ def response(update: Update, context: CallbackContext) -> None:
     query.answer()
 
     if query.data == "135New Order":
+        userId = update.callback_query.from_user.id
+        order = backEnd.getUser(userId)
+        order.Splitting = False
         return newOrder(query, context)
 
     if query.data == "135Check":
         return check(query, context)
 
     if query.data == "135SplitOrder":
+        userId = update.callback_query.from_user.id
+        order = backEnd.getUser(userId)
+        order.Ordering = False
         return split(query, context)
 
     if query.data[0:12] == "135Add Order":
@@ -448,6 +463,7 @@ def response(update: Update, context: CallbackContext) -> None:
         if not splitOrder.canUpdate:
             return
         else:
+            print("update")
             userId = update.callback_query.from_user.id
             currentUser = backEnd.getUser(userId)
             currentUser.listID = index
@@ -590,6 +606,7 @@ def inlineOrderList(update: Update, context: CallbackContext):
                     description=order.timing,
                     input_message_content=InputTextMessageContent(backEnd.OrderLists[index].fullList()),
                     reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS),
+                    thumb_url="https://i.ibb.co/60fTBV9/ezorder-logo.jpg",
                 )
             )
         else:
@@ -607,6 +624,7 @@ def inlineOrderList(update: Update, context: CallbackContext):
                     description=currSplitList.timing,
                     input_message_content=InputTextMessageContent(backEnd.SplitLists[index].contributorsList()),
                     reply_markup=reply_markup,
+                    thumb_url="https://i.ibb.co/60fTBV9/ezorder-logo.jpg"
                 )
             )
     update.inline_query.answer(results)
@@ -885,7 +903,6 @@ def check(update: Update, context: CallbackContext) -> None:
     user_name = f'{update.from_user.username}'
     currentUser = backEnd.getUser(userId)
     index = currentUser.listID
-    order = backEnd.OrderLists[index]
     BUTTONS = [
         [
             InlineKeyboardButton('Update', callback_data='135CheckUpdate' + str(index)),
@@ -1092,7 +1109,7 @@ def main():
     dispatcher.add_handler(CommandHandler("copy", copyCommand))
     dispatcher.add_handler(CallbackQueryHandler(response))
 
-    dispatcher.add_error_handler(error)
+    # dispatcher.add_error_handler(error)
     dispatcher.add_handler(MessageHandler(Filters.text, prompts))
     # dispatcher.add_handler(MessageHandler(Filters.text, phoneNumber))
     dispatcher.add_handler(InlineQueryHandler(inlineOrderList))
