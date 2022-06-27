@@ -6,11 +6,12 @@ from backEnd import backEnd
 from user import User
 from datetime import datetime
 import json
+from Secrets import API_Token, BotURL
 
-updater = Updater('5316303881:AAEIysIUYoZ45d1EwN_5Jl6dGonJfv_ZE8g')
+updater = Updater(API_Token)
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = 'https://t.me/ezezezezezorderbot'
+botURL = BotURL
 backEnd = backEnd()
 listId = 0
 splitListId = 0
@@ -1116,6 +1117,7 @@ def cancel(update: Update, _: CallbackContext) -> None:
     backEnd.SplitLists = []
     TITLE_ARRAY = []
     update.message.reply_text('Order List creation has been canceled.')
+
 
 
 def main():
