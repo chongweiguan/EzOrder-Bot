@@ -7,7 +7,9 @@ class SplitList:
         self.phoneNum = ""
         self.Title = ""
         self.groupChatUpdate = ''
+        # key is item, value is [price, contributors, unpaid]
         self.items = {}
+        self.type = "split"
         self.timing = timing[1:20]
         self.addPrice = False
         self.orderStatus = True
@@ -17,7 +19,6 @@ class SplitList:
         price = ""
         contributors = []
         unpaid = []
-        unpaid.append("")
         self.items[item] = [price,contributors,unpaid]
 
     def contributorsList(self):
@@ -96,5 +97,26 @@ class SplitList:
         firstValue = list(self.items.values())[0]
         contributors = firstValue[1]
         return not contributors
+
+    def getOrder(self, name, item):
+    # iterate through the key first
+        for i in self.items.keys():
+            if i == item:
+                for j in self.items[item][1]:
+                    if name == j:
+                        return "" + name + " - " + item
+
+                    else:
+                        return "No user"
+            else:
+                return "No item"
+
+    def getCheckList(self, item, unpaid):
+        text = self.Title
+        for i in unpaid:
+            text = text + "\n" + i + " - " + item + "\n"
+        return text
+
+
 
 

@@ -12,6 +12,7 @@ class OrderList:
         self.updateList = {}
         self.orders = []
         self.unpaid = {}
+        self.type = "order"
         self.groupChatListUpdate = ''
         self.orderStatus = True
         self.addOrder = False

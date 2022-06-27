@@ -16,12 +16,14 @@ listId = 0
 splitListId = 0
 backEndId = 0
 
+
 def isfloat(num):
     try:
         float(num)
         return True
     except ValueError:
         return False
+
 
 def startCommand(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
@@ -189,7 +191,6 @@ def prompts(update: Update, context: CallbackContext):
                 update.message.reply_text('Invalid Input: Please make sure that you have sent a 8 digit phone number'
                                           + ' or 1')
 
-
     if user.Splitting:
         if backEnd.latestList(userId).phoneNum == "" and \
                 backEnd.latestList(userId).Title == "":
@@ -265,8 +266,9 @@ def response(update: Update, context: CallbackContext) -> None:
             currentUser.listUpdate = update
             currentList = backEnd.OrderLists[index]
             currentList.groupChatListUpdate = update
+            backendId = currentList.backEndId
             currentUser.Adding = True
-            currentUser.memberLists[index] = currentList
+            currentUser.memberLists[backendId] = currentList
             return addCommand(currentUser.personalUpdate, context)
 
     if query.data[0:15] == "135Delete Order":
@@ -285,8 +287,9 @@ def response(update: Update, context: CallbackContext) -> None:
             currentUser.listUpdate = update
             currentList = backEnd.OrderLists[index]
             currentList.groupChatListUpdate = update
+            backendId = currentList.backEndId
             currentUser.Deleting = True
-            currentUser.memberLists[index] = currentList
+            currentUser.memberLists[backendId] = currentList
             return deleteCommand(currentUser.personalUpdate, context)
 
     if query.data == "135NoDelete":
@@ -312,7 +315,8 @@ def response(update: Update, context: CallbackContext) -> None:
             currentList = backEnd.OrderLists[index]
             currentList.groupChatListUpdate = update
             currentUser.Editing = True
-            currentUser.memberLists[index] = currentList
+            backendId = currentList.backEndId
+            currentUser.memberLists[backendId] = currentList
             return editCommand(currentUser.personalUpdate, context)
 
     if query.data[0:13] == "135Copy Order":
@@ -332,7 +336,8 @@ def response(update: Update, context: CallbackContext) -> None:
             currentList = backEnd.OrderLists[index]
             currentList.groupChatListUpdate = update
             currentUser.Copying = True
-            currentUser.memberLists[index] = currentList
+            backendId = currentList.backEndId
+            currentUser.memberLists[backendId] = currentList
             return copyCommand(currentUser.personalUpdate, context)
 
     if query.data[0:9] == "135Update":
@@ -443,17 +448,23 @@ def response(update: Update, context: CallbackContext) -> None:
         item = ''
         indexString = ''
         for i in range(len(query.data)):
-            if ord(query.data[13 + i]) >= 48 and ord(query.data[13 + i]) <= 57 :
+            if ord(query.data[13 + i]) >= 48 and ord(query.data[13 + i]) <= 57:
                 indexString = indexString + query.data[13 + i]
             else:
                 item = item + query.data[14 + i:]
                 break
         index = int(indexString)
-        #userId = update.callback_query.from_user.id
-        #currentUser = backEnd.getUser(userId)
-        #currentUser.listID = index
+        userId = update.callback_query.from_user.id
+        currentUser = backEnd.getUser(userId)
+        if currentUser == None:
+            backEnd.addUser(userId)
+        currentUser = backEnd.getUser(userId)
+        # currentUser.listID = index
         currentList = backEnd.SplitLists[index]
+        backendId = currentList.backEndId
+        currentUser.memberLists[backendId] = currentList
         currentList.groupChatUpdate = update
+
         return contribute(update, context, item, index)
 
     if query.data[0:14] == "135SplitUpdate":
@@ -470,7 +481,7 @@ def response(update: Update, context: CallbackContext) -> None:
             # currentUser.listUpdate = update
             return updateSplitList(update, context)
 
-    if query.data[0:12] =="135SplitPaid":
+    if query.data[0:12] == "135SplitPaid":
         item = ''
         indexString = ''
         for i in range(len(query.data)):
@@ -480,9 +491,9 @@ def response(update: Update, context: CallbackContext) -> None:
                 item = item + query.data[13 + i:]
                 break
         index = int(indexString)
-        #userId = update.callback_query.from_user.id
-        #currentUser = backEnd.getUser(userId)
-        #currentUser.listID = index
+        # userId = update.callback_query.from_user.id
+        # currentUser = backEnd.getUser(userId)
+        # currentUser.listID = index
         currentList = backEnd.SplitLists[index]
         currentList.groupChatUpdate = update
         return splitPaid(update, context, item, index)
@@ -812,6 +823,7 @@ def closedOrder(update: Update, context: CallbackContext) -> None:
             reply_markup=InlineKeyboardMarkup(BUTTONS)
         )
 
+
 def openOrder(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.message.chat.id  # correct userID
     currentUser = backEnd.getUser(userId)
@@ -916,6 +928,7 @@ def check(update: Update, context: CallbackContext) -> None:
         reply_markup=InlineKeyboardMarkup(BUTTONS)
     )
 
+
 def split(update: Update, context: CallbackContext) -> None:
     userId = update.message.chat.id
     backEnd.addUser(userId)
@@ -932,6 +945,7 @@ def split(update: Update, context: CallbackContext) -> None:
     splitListId += 1
     backEndId += 1
     update.message.reply_text("What will be the title of your Split List be?")
+
 
 def splitList(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
@@ -959,11 +973,12 @@ def splitList(update: Update, context: CallbackContext) -> None:
         disable_web_page_preview=True
     )
 
+
 def contribute(update: Update, context: CallbackContext, item, index) -> None:
     user_name = f'{update.callback_query.from_user.username}'
     userId = update.callback_query.from_user.id  # correct userID
-    #currentUser = backEnd.getUser(userId)
-    #index = currentUser.listID
+    # currentUser = backEnd.getUser(userId)
+    # index = currentUser.listID
     List = backEnd.SplitLists[index]
     contributorsArray = List.items[item][1]
     unpaidArray = List.items[item][2]
@@ -992,6 +1007,7 @@ def contribute(update: Update, context: CallbackContext, item, index) -> None:
         reply_markup=reply_markup
     )
 
+
 def updateSplitList(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.from_user.id
     user = backEnd.getUser(userId)
@@ -1018,6 +1034,7 @@ def updateSplitList(update: Update, context: CallbackContext) -> None:
         disable_web_page_preview=True
     )
 
+
 def closedSplitList(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.message.chat.id  # correct userID
     user = backEnd.getUser(userId)
@@ -1037,6 +1054,7 @@ def closedSplitList(update: Update, context: CallbackContext) -> None:
         text=text,
         reply_markup=reply_markup
     )
+
 
 def openSplitList(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.message.chat.id  # correct userID
@@ -1058,11 +1076,12 @@ def openSplitList(update: Update, context: CallbackContext) -> None:
         reply_markup=reply_markup
     )
 
+
 def splitPaid(update: Update, context: CallbackContext, item, index) -> None:
     user_name = f'{update.callback_query.from_user.username}'
     userId = update.callback_query.from_user.id  # correct userID
-    #currentUser = backEnd.getUser(userId)
-    #index = currentUser.listID
+    # currentUser = backEnd.getUser(userId)
+    # index = currentUser.listID
     List = backEnd.SplitLists[index]
     currentListUpdate = List.groupChatUpdate
     currItem = List.items[item]

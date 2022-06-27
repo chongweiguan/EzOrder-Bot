@@ -27,8 +27,15 @@ class User:
     def outstandingOrders(self):
         text = ""
         for i in range(len(self.creatorLists)):
-            if len(self.creatorLists[i].unpaid) != 0:
-                text = text + self.creatorLists[i].getCheckList() + "\n"
+            list = self.creatorLists[i]
+            if list.type == "order":
+                if len(self.creatorLists[i].unpaid) != 0:
+                    text = text + self.creatorLists[i].getCheckList() + "\n"
+            else:
+                #go through each item
+                for j, k in list.items.items():
+                    if k[2] != 0:
+                        text = text + list.getCheckList(j, k[2]) + "\n"
         return text
 
     def outstandingPayments(self, name):
@@ -40,7 +47,12 @@ class User:
         for val in self.memberLists.values():
             orderLists.append(val)
         for i in range(len(orderLists)):
-            if name in orderLists[i].unpaid.keys():
-                text = text + orderLists[i].ownerName + " for " + orderLists[i].Title + "\n" + orderLists[i].getOrder(name)
+            if orderLists[i].type == "order":
+                if name in orderLists[i].unpaid.keys():
+                    text = text + orderLists[i].ownerName + " for " + orderLists[i].Title + "\n" + orderLists[i].getOrder(name)
+            else:
+                for k, v in orderLists[i].items.items():
+                    if name in v[2]:
+                        text = text + orderLists[i].ownerName + " for " + orderLists[i].Title + "\n" + orderLists[i].getOrder(name, k)
 
         return text
