@@ -238,18 +238,24 @@ def response(update: Update, context: CallbackContext) -> None:
 
     if query.data == "135New Order":
         userId = update.callback_query.from_user.id
-        order = backEnd.getUser(userId)
-        order.Splitting = False
-        return newOrder(query, context)
+        user = backEnd.getUser(userId)
+        if user.splitting == True:
+            query.message.reply_text("You're in the middle of creating a Split List, " +
+                                     "finish that before creating another list")
+        else:
+            return newOrder(query, context)
 
     if query.data == "135Check":
         return check(query, context)
 
     if query.data == "135SplitOrder":
         userId = update.callback_query.from_user.id
-        order = backEnd.getUser(userId)
-        order.Ordering = False
-        return split(query, context)
+        user = backEnd.getUser(userId)
+        if user.Ordering == True:
+            query.message.reply_text("You're in the middle of creating an Order List, " +
+                                     "finish that before creating another list")
+        else:
+            return split(query, context)
 
     if query.data[0:12] == "135Add Order":
         userId = update.callback_query.from_user.id
@@ -564,6 +570,8 @@ def orderList(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
     currTitle = backEnd.latestList(userId).Title
     index = backEnd.latestList(userId).listId
+    user = backEnd.getUser(userId)
+    user.Ordering = False
 
     keyboard = [
         [
@@ -584,6 +592,7 @@ def orderList(update: Update, context: CallbackContext) -> None:
         reply_markup=reply_markup,
         disable_web_page_preview=True
     )
+
 
 
 def inlineOrderList(update: Update, context: CallbackContext):
@@ -952,6 +961,8 @@ def splitList(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
     currTitle = backEnd.latestList(userId).Title
     index = backEnd.latestList(userId).listId
+    user = backEnd.getUser(userId)
+    user.Splitting = False
 
     keyboard = [
         [
