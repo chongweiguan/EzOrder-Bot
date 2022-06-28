@@ -239,7 +239,7 @@ def response(update: Update, context: CallbackContext) -> None:
     if query.data == "135New Order":
         userId = update.callback_query.from_user.id
         user = backEnd.getUser(userId)
-        if user.splitting == True:
+        if user.Splitting == True:
             query.message.reply_text("You're in the middle of creating a Split List, " +
                                      "finish that before creating another list")
         else:
