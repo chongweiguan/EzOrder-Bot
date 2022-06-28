@@ -6,12 +6,12 @@ from backEnd import backEnd
 from user import User
 from datetime import datetime
 import json
-from Secrets import API_Token, BotURL
+from Secrets import API_Token, Bot_URL
 
 updater = Updater(API_Token)
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = BotURL
+botURL = Bot_URL
 backEnd = backEnd()
 listId = 0
 splitListId = 0
@@ -242,6 +242,9 @@ def response(update: Update, context: CallbackContext) -> None:
         if user.Splitting == True:
             query.message.reply_text("You're in the middle of creating a Split List, " +
                                      "finish that before creating another list")
+            user.titleList.pop()
+            print(user.titleList)
+            return split(query, context)
         else:
             return newOrder(query, context)
 
@@ -254,6 +257,9 @@ def response(update: Update, context: CallbackContext) -> None:
         if user.Ordering == True:
             query.message.reply_text("You're in the middle of creating an Order List, " +
                                      "finish that before creating another list")
+            user.titleList.pop()
+            print(user.titleList)
+            return newOrder(query, context)
         else:
             return split(query, context)
 
@@ -598,6 +604,8 @@ def orderList(update: Update, context: CallbackContext) -> None:
 def inlineOrderList(update: Update, context: CallbackContext):
     userId = update.inline_query.from_user.id
     user = backEnd.getUser(userId)
+    print(userId)
+    print(backEnd.userLists)
 
     results = []
 
