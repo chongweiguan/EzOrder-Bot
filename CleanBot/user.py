@@ -10,6 +10,10 @@ class User:
         self.listID = 0
         self.listUpdate = ''
         self.personalUpdate = ''
+        self.currentTitle = ""
+        self.currentNo = ""
+        self.items = []
+        self.prices = []
         self.Adding = False
         self.Ordering = False
         self.addingCommand = False
@@ -20,6 +24,7 @@ class User:
         self.Copying = False
         self.copyingCommand = False
         self.Splitting = False
+        self.addingPrice = False
 
     def isAdding(self):
         return self.Adding

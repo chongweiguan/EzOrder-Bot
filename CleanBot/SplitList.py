@@ -15,6 +15,10 @@ class SplitList:
         self.orderStatus = True
         self.canUpdate = False
 
+    def makeItemsDict(self, userItems, userPrices):
+        for (x, y) in zip(userItems, userPrices):
+            self.items[x] = [y, [], []]
+
     def addItem(self, item):
         price = ""
         contributors = []
@@ -87,7 +91,7 @@ class SplitList:
             cost = int(self.getPrice(keys[i]))
             #ALLS GOOD TILL HERE
             splitPrice = self.splitPrice(cost, numofContributors)
-            text = text + "\n\n$" + str(splitPrice) + " for " + keys[i] + ":"
+            text = text + "\n\n$" + str(splitPrice) + " for " + keys[i] + ":\n"
             for j in range(len(vals[i][2])):
                 text = text + vals[i][2][j] + "\n"
         text = text + "\n"

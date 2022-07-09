@@ -47,7 +47,7 @@ class OrderList:
     def fullList(self):
         warning = "If this is your first time using the bot, before doing anything, click the bot chat button " + \
                   "followed by the Start button. Then head back to this chat to start using the buttons below!!\n\n"
-        text = warning + "Collating orders for " + self.Title + "! \nPayLah to " + self.phoneNum + "\n\n\nOrders:"
+        text = warning + "Collating orders for " + self.Title + "! \nTransfer to " + self.phoneNum + "\n\n\nOrders:"
         for i in range(len(self.peopleList)):
             text = text + "\n" + self.peopleList[i] + " - " + self.orders[i]
 

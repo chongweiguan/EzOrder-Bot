@@ -6,12 +6,13 @@ from backEnd import backEnd
 from user import User
 from datetime import datetime
 import json
-from Secrets import API_Token, Bot_URL
 
-updater = Updater(API_Token)
+# from Secrets import API_Token, Bot_URL
+
+updater = Updater('5316303881:AAEIysIUYoZ45d1EwN_5Jl6dGonJfv_ZE8g')
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = Bot_URL
+botURL = 'https://t.me/ezezezezezorderbot'
 backEnd = backEnd()
 listId = 0
 splitListId = 0
@@ -171,63 +172,62 @@ def prompts(update: Update, context: CallbackContext):
         return editingOrder(update, context)
 
     if user.Ordering:
-        if backEnd.latestList(userId).phoneNum == "" and \
-                backEnd.latestList(userId).Title == "":
-            backEnd.latestList(userId).Title = update.message.text
-            user.titleList.append(update.message.text)
+        if user.currentNo == "" and \
+                user.currentTitle == "":
+            user.currentTitle = update.message.text
             update.message.reply_text('What is your phone number?' +
                                       ' (Send 1 if you do not want to display your phone number)')
             return
 
-        if backEnd.latestList(userId).phoneNum == "":
+        if user.currentNo == "":
             if update.message.text.isnumeric() and len(update.message.text) == 8:
-                backEnd.latestList(userId).phoneNum = update.message.text
-                backEnd.getUser(userId).Ordering = False
+                user.currentNo = update.message.text
+                user.Ordering = False
                 return orderList(update, context)
             elif update.message.text == "1":
-                backEnd.latestList(userId).phoneNum = update.message.from_user.username
-                backEnd.getUser(userId).Ordering = False
+                user.currentNo = update.message.from_user.username
+                user.Ordering = False
                 return orderList(update, context)
             else:
                 update.message.reply_text('Invalid Input: Please make sure that you have sent a 8 digit phone number'
                                           + ' or 1')
 
     if user.Splitting:
-        if backEnd.latestList(userId).phoneNum == "" and \
-                backEnd.latestList(userId).Title == "":
-            backEnd.latestList(userId).Title = update.message.text
-            user.titleList.append(update.message.text)
-            update.message.reply_text('What is your phone number? ')
+        if user.currentNo == "" and \
+                user.currentTitle == "":
+            user.currentTitle = update.message.text
+            update.message.reply_text('What is your phone number? '
+                                      + '(Send 1 if you do not want to display your phone number)')
             return
-        elif backEnd.latestList(userId).phoneNum == "":
+        elif user.currentNo == "":
             if update.message.text.isnumeric() and len(update.message.text) == 8:
-                backEnd.latestList(userId).phoneNum = update.message.text
+                user.currentNo = update.message.text
                 update.message.reply_text("Please send me your first item")
-                backEnd.latestList(userId).addPrice = True
+                user.addingPrice = True
                 return
             elif update.message.text == "1":
-                backEnd.latestList(userId).phoneNum = update.message.from_user.username
+                user.currentNo = update.message.from_user.username
                 update.message.reply_text("Please send me your first item")
-                backEnd.latestList(userId).addPrice = True
+                user.addingPrice = True
                 return
             else:
                 update.message.reply_text('Invalid Input: Please make sure that you have sent a 8 digit phone number'
                                           + ' or 1')
-        elif update.message.text != "/done" and backEnd.latestList(userId).addPrice == True:
-            backEnd.latestList(userId).addItem(update.message.text)
+        elif update.message.text != "/done" and user.addingPrice:
+            user.items.append(update.message.text)
             update.message.reply_text("What is the price of this item?")
-            backEnd.latestList(userId).addPrice = False
+            user.addingPrice = False
             return
-        elif update.message.text != "/done" and backEnd.latestList(userId).addPrice == False:
+        elif update.message.text != "/done" and user.addingPrice == False:
             if isfloat(update.message.text):
-                backEnd.latestList(userId).getLatestItem()[0] = update.message.text
+                user.prices.append(update.message.text)
                 update.message.reply_text("Good. now send me another item, or /done to finish.")
-                backEnd.latestList(userId).addPrice = True
+                user.addingPrice = True
             else:
                 update.message.reply_text("Price has to be a number")
                 return
         elif update.message.text == "/done":
-            backEnd.latestList(userId).addPrice = False
+            user.addingPrice = False
             return splitList(update, context)
 
 
@@ -239,13 +239,14 @@ def response(update: Update, context: CallbackContext) -> None:
     if query.data == "135New Order":
         userId = update.callback_query.from_user.id
         user = backEnd.getUser(userId)
-        if user.Splitting == True:
+        if user.Splitting:
             query.message.reply_text("You're in the middle of creating a Split List, " +
-                                     "finish that before creating another list")
-            user.titleList.pop()
-            print(user.titleList)
-            return split(query, context)
+                                     "finish that before creating another list or type /cancel"
+                                     + " to terminate this order")
+            return
         else:
+            user.currentTitle = ""
+            user.currentNo = ""
             return newOrder(query, context)
 
     if query.data == "135Check":
@@ -254,12 +255,13 @@ def response(update: Update, context: CallbackContext) -> None:
     if query.data == "135SplitOrder":
         userId = update.callback_query.from_user.id
         user = backEnd.getUser(userId)
-        if user.Ordering == True:
-            query.message.reply_text("You're in the middle of creating an Order List, " +
-                                     "finish that before creating another list")
-            user.titleList.pop()
-            print(user.titleList)
-            return newOrder(query, context)
+        user.currentTitle = ""
+        user.currentNo = ""
+        if user.Ordering:
+            query.message.reply_text("You're in the middle of creating a Order List, " +
+                                     "finish that before creating another list or type /cancel"
+                                     + " to terminate this order")
+            return
         else:
             return split(query, context)
 
@@ -529,18 +531,6 @@ def newOrder(update: Update, context: CallbackContext) -> None:
     backEnd.addUser(userId)
     user = backEnd.getUser(userId)
     user.Ordering = True
-    # instantiate a OrderList and add it to backend
-    global listId
-    global backEndId
-    now = datetime.now()
-    stringNow = json.dumps(now, default=str)
-    orderingList = OrderList(listId, stringNow, backEndId)
-    orderingList.ownerName = update.from_user.username
-    backEnd.OrderLists.append(orderingList)
-    # add the orderList to the users creators list
-    user.creatorLists.append(orderingList)
-    listId += 1
-    backEndId += 1
     # add the user to backend userList if not inside alr
     update.message.reply_text('What will the title of your Order List be?')
 
@@ -574,10 +564,27 @@ def updateList(update: Update, context: CallbackContext) -> None:
 
 def orderList(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
-    currTitle = backEnd.latestList(userId).Title
-    index = backEnd.latestList(userId).listId
     user = backEnd.getUser(userId)
+    # instantiate a OrderList and add it to backend
+    global listId
+    global backEndId
+    now = datetime.now()
+    stringNow = json.dumps(now, default=str)
+    orderingList = OrderList(listId, stringNow, backEndId)
+    orderingList.Title = user.currentTitle
+    orderingList.phoneNum = user.currentNo
+    orderingList.ownerName = update.message.from_user.username
+    backEnd.OrderLists.append(orderingList)
+    # add the orderList to the users creators list
+    user.creatorLists.append(orderingList)
+    currTitle = user.currentTitle
+    index = listId
+    listId += 1
+    backEndId += 1
+    user.titleList.append(user.currentTitle)
     user.Ordering = False
+    user.currentTitle = ""
+    user.currentNo = ""
 
     keyboard = [
         [
@@ -594,18 +601,15 @@ def orderList(update: Update, context: CallbackContext) -> None:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text(
-        text=backEnd.latestList(userId).fullList(),
+        text=backEnd.OrderLists[index].fullList(),
         reply_markup=reply_markup,
         disable_web_page_preview=True
     )
 
 
-
 def inlineOrderList(update: Update, context: CallbackContext):
     userId = update.inline_query.from_user.id
     user = backEnd.getUser(userId)
-    print(userId)
-    print(backEnd.userLists)
 
     results = []
 
@@ -952,25 +956,33 @@ def split(update: Update, context: CallbackContext) -> None:
     backEnd.addUser(userId)
     user = backEnd.getUser(userId)
     user.Splitting = True
-    global splitListId
-    global backEndId
-    now = datetime.now()
-    stringNow = json.dumps(now, default=str)
-    splitList = SplitList(splitListId, stringNow, backEndId)
-    splitList.ownerName = update.from_user.username
-    backEnd.SplitLists.append(splitList)
-    user.creatorLists.append(splitList)
-    splitListId += 1
-    backEndId += 1
     update.message.reply_text("What will be the title of your Split List be?")
 
 
 def splitList(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
-    currTitle = backEnd.latestList(userId).Title
-    index = backEnd.latestList(userId).listId
     user = backEnd.getUser(userId)
+    global splitListId
+    global backEndId
+    now = datetime.now()
+    stringNow = json.dumps(now, default=str)
+    splits = SplitList(splitListId, stringNow, backEndId)
+    splits.ownerName = update.message.from_user.username
+    splits.Title = user.currentTitle
+    splits.phoneNum = user.currentNo
+    splits.makeItemsDict(user.items, user.prices)
+    backEnd.SplitLists.append(splits)
+    user.creatorLists.append(splits)
+    currTitle = user.currentTitle
+    index = splitListId
+    user.titleList.append(user.currentTitle)
+    splitListId += 1
+    backEndId += 1
     user.Splitting = False
+    user.currentTitle = ""
+    user.currentNo = ""
+    user.items = []
+    user.prices = []
 
     keyboard = [
         [
@@ -1128,15 +1140,29 @@ def error(update, context):
 
 
 def cancel(update: Update, _: CallbackContext) -> None:
-    backEnd.Ordering = False
-    backEnd.Checking = False
-    backEnd.Splitting = False
-    backEnd.OrderLists = []
-    backEnd.CheckLists = []
-    backEnd.SplitLists = []
-    TITLE_ARRAY = []
-    update.message.reply_text('Order List creation has been canceled.')
-
+    userId = update.message.from_user.id
+    if backEnd.getUser(userId) is None:
+        backEnd.addUser(userId)
+    user = backEnd.getUser(userId)
+    if not user.Ordering and not user.Splitting:
+        update.message.reply_text("You are currently not creating a List")
+    else:
+        user.currentTitle = ""
+        user.currentNo = ""
+        user.items = []
+        user.prices = []
+        user.Adding = False
+        user.Ordering = False
+        user.addingCommand = False
+        user.Deleting = False
+        user.deletingCommand = False
+        user.Editing = False
+        user.editingCommand = False
+        user.Copying = False
+        user.copyingCommand = False
+        user.Splitting = False
+        user.addingPrice = False
+        update.message.reply_text('List creation has been canceled.')
 
 
 def main():
