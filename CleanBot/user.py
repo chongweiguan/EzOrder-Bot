@@ -38,9 +38,12 @@ class User:
                     text = text + self.creatorLists[i].getCheckList() + "\n"
             else:
                 #go through each item
-                for j, k in list.items.items():
-                    if k[2] != 0:
-                        text = text + list.getCheckList(j, k[2]) + "\n"
+                if list.isDebt():
+                    text = text + list.Title + "\n"
+                    for j, k in list.items.items():
+                        if len(k[2]) != 0:
+                            text = text + list.getCheckList(j, k[2])
+                    text = text + "\n"
         return text
 
     def outstandingPayments(self, name):
@@ -52,12 +55,21 @@ class User:
         for val in self.memberLists.values():
             orderLists.append(val)
         for i in range(len(orderLists)):
-            if orderLists[i].type == "order":
+            list = orderLists[i]
+            if list.type == "order":
                 if name in orderLists[i].unpaid.keys():
                     text = text + orderLists[i].ownerName + " for " + orderLists[i].Title + "\n" + orderLists[i].getOrder(name)
             else:
-                for k, v in orderLists[i].items.items():
-                    if name in v[2]:
-                        text = text + orderLists[i].ownerName + " for " + orderLists[i].Title + "\n" + orderLists[i].getOrder(name, k)
+                if list.isOwe(name):
+                    text = text + list.ownerName + " for " + list.Title + "\n"
+                    for k, v in list.items.items():
+                        if name in v[2]:
+                            text = text + list.outOrder(name, k)
 
         return text
+
+    def isRepeated(self, item):
+        for x in self.items:
+            if item in self.items:
+                return True
+        return False

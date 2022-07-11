@@ -83,4 +83,9 @@ class OrderList:
         if update.chat_instance not in self.updateList:
             self.updateList[update.chat_instance] = update
 
+    def checkItems(self, item):
+        for k in self.items.keys():
+            if item == k:
+                return True
+        return False
 

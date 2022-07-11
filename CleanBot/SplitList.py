@@ -74,6 +74,8 @@ class SplitList:
         return item[0]
 
     def splitPrice(self, cost, numofPeople):
+        if numofPeople == 0:
+            return "0"
         return round(cost/numofPeople, 2)
 
 
@@ -88,7 +90,7 @@ class SplitList:
             vals.append(val)
         for i in range(len(keys)):
             numofContributors = len(self.contributorsArray(keys[i]))
-            cost = int(self.getPrice(keys[i]))
+            cost = float(self.getPrice(keys[i]))
             #ALLS GOOD TILL HERE
             splitPrice = self.splitPrice(cost, numofContributors)
             text = text + "\n\n$" + str(splitPrice) + " for " + keys[i] + ":\n"
@@ -108,19 +110,33 @@ class SplitList:
             if i == item:
                 for j in self.items[item][1]:
                     if name == j:
-                        return "" + name + " - " + item
-
+                        return "" + name + " - " + item + "\n"
                     else:
                         return "No user"
             else:
                 return "No item"
 
     def getCheckList(self, item, unpaid):
-        text = self.Title
+        text = ""
         for i in unpaid:
-            text = text + "\n" + i + " - " + item + "\n"
+            text = text + i + " - " + item + "\n"
         return text
 
+    #check if this split list has any item with a debt
+    def isDebt(self):
+        for k in self.items.values():
+            if len(k[2]) != 0:
+                return True
+            else:
+                return False
 
+    #check if name argument owes any money in the split list
+    def isOwe(self, name):
+        for k in self.items.values():
+            for x in k[2]:
+                if x == name:
+                    return True
+        return False
 
-
+    def outOrder(self, name, item):
+        return "" + name + " - " + item + "\n"

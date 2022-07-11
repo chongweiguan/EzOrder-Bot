@@ -214,6 +214,9 @@ def prompts(update: Update, context: CallbackContext):
                 update.message.reply_text('Invalid Input: Please make sure that you have sent a 8 digit phone number'
                                           + ' or 1')
         elif update.message.text != "/done" and user.addingPrice:
+            if user.isRepeated(update.message.text):
+                update.message.reply_text("You already have this item in the list")
+                return
             user.items.append(update.message.text)
             update.message.reply_text("What is the price of this item?")
             user.addingPrice = False
