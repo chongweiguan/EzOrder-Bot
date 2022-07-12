@@ -11,6 +11,7 @@ class OrderList:
         #chat instance key, update value
         self.updateList = {}
         self.orders = []
+        self.orderSummary = {}
         self.unpaid = {}
         self.type = "order"
         self.groupChatListUpdate = ''
@@ -20,6 +21,7 @@ class OrderList:
         self.copyOrder = False
         self.deleteOrder = False
         self.canUpdate = False
+        self.counter = 0
 
     def addName(self, name):
         self.peopleList.append(name)
@@ -41,7 +43,8 @@ class OrderList:
         for val in self.unpaid.values():
             vals.append(val)
         for i in range(len(keys)):
-            text = text + "\n" + keys[i] + " - " + vals[i] + "\n"
+            for x in range(len(vals[i])):
+                text = text + "\n" + keys[i] + " - " + vals[i][x].orderName
         return text
 
     def fullList(self):
@@ -49,7 +52,7 @@ class OrderList:
                   "followed by the Start button. Then head back to this chat to start using the buttons below!!\n\n"
         text = warning + "Collating orders for " + self.Title + "! \nTransfer to " + self.phoneNum + "\n\n\nOrders:"
         for i in range(len(self.peopleList)):
-            text = text + "\n" + self.peopleList[i] + " - " + self.orders[i]
+            text = text + "\n" + str(i + 1) + ") " + self.peopleList[i] + " - " + self.orders[i].orderName
 
         return text
 
@@ -57,20 +60,33 @@ class OrderList:
         text = "Order closed! \nTransfer " + self.phoneNum + " for " + \
                self.Title + "! \n\n\nOrders will be removed once you click the Paid button: "
         for k, v in self.unpaid.items():
-            text += "\n" + k + " - " + v
+            for x in v:
+                text += "\n" + k + " - " + x.orderName
+        return text
 
+    def getCheckOrder(self, name):
+        text = ""
+        orderArray = self.unpaid[name]
+        if orderArray is None:
+            return "no such order"
+        for x in orderArray:
+            text += name + " - " + x.orderName + "\n"
         return text
 
     def getOrder(self, name):
-        for i in range(len(self.peopleList)):
-            if name == self.peopleList[i]:
-                return "" + self.peopleList[i] +" - " + self.orders[i]
-        return "no such order"
+        text = ""
+        orderArray = self.orderSummary[name]
+        if orderArray is None:
+            return "no such order"
+        for x in orderArray:
+            text += name + " - " + x.orderName + "\n"
+        return text
+
 
     def getOnlyOrder(self, name):
         for i in range(len(self.peopleList)):
             if name == self.peopleList[i]:
-                return self.orders[i]
+                return self.orderSummary[name]
         return "no such order"
 
     def paidStatus(self, username):
@@ -88,4 +104,15 @@ class OrderList:
             if item == k:
                 return True
         return False
+
+    def giveIndex(self):
+        self.counter += 1
+        return self.counter
+
+    def indivOrders(self, user_name):
+        text = ""
+        orderArray = self.orderSummary[user_name]
+        for x in orderArray:
+            text += "Order " + str(x.orderId) + ": " + x.orderName + "\n"
+        return text
 

@@ -8,6 +8,7 @@ class User:
         self.creatorLists = []
         self.titleList = []
         self.listID = 0
+        self.activeOrder = None
         self.listUpdate = ''
         self.personalUpdate = ''
         self.currentTitle = ""
@@ -16,13 +17,9 @@ class User:
         self.prices = []
         self.Adding = False
         self.Ordering = False
-        self.addingCommand = False
         self.Deleting = False
-        self.deletingCommand = False
         self.Editing = False
-        self.editingCommand = False
         self.Copying = False
-        self.copyingCommand = False
         self.Splitting = False
         self.addingPrice = False
 
@@ -58,7 +55,8 @@ class User:
             list = orderLists[i]
             if list.type == "order":
                 if name in orderLists[i].unpaid.keys():
-                    text = text + orderLists[i].ownerName + " for " + orderLists[i].Title + "\n" + orderLists[i].getOrder(name)
+                    text = text + orderLists[i].ownerName + " for " + orderLists[i].Title + "\n" + \
+                           orderLists[i].getCheckOrder(name)
             else:
                 if list.isOwe(name):
                     text = text + list.ownerName + " for " + list.Title + "\n"
@@ -73,3 +71,13 @@ class User:
             if item in self.items:
                 return True
         return False
+
+    def orderStatus(self):
+        if self.Adding == True:
+            return "Adding"
+        elif self.Editing == True:
+            return "Editing"
+        elif self.Copying == True:
+            return "Copying"
+        elif self.Deleting == True:
+            return "Deleting"
