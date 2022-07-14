@@ -8,12 +8,12 @@ from user import User
 from datetime import datetime
 import json
 
-# from Secrets import API_Token, Bot_URL
+from Secrets import API_Token, Bot_URL
 
-updater = Updater('5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
+updater = Updater(API_Token)
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /start to begin!'
-botURL = 'https://t.me/ezordertest_bot'
+botURL = Bot_URL
 backEnd = backEnd()
 listId = 0
 splitListId = 0
@@ -470,14 +470,12 @@ def response(update: Update, context: CallbackContext) -> None:
             else:
                 return unpay(update, context)
 
-    # if query.data[0:9] == "135Remind":
-    #     update.message = query.data[9:]
-    #     index = int(query.data[9:])
-    #     order = backEnd.OrderLists[index]
-    #     userId = update.callback_query.message.chat.id
-    #     currentUser = backEnd.getUser(userId)
-    #     currentUser.listID = index
-    #     return reminder(update, context)
+    if query.data[0:14] == '135CheckRemind':
+        return reminder(update, context)
+
+    if query.data[0:15] == '135RemindAllYes':
+        return remindall(update, context)
+
 
     if query.data[0:13] == "135Contribute":
         item = ''
@@ -509,7 +507,7 @@ def response(update: Update, context: CallbackContext) -> None:
         if not splitOrder.canUpdate:
             return
         else:
-            print("update")
+            #print("update")
             userId = update.callback_query.from_user.id
             currentUser = backEnd.getUser(userId)
             currentUser.listID = index
@@ -722,8 +720,10 @@ def addingOrder(update: Update, context: CallbackContext) -> None:
     if user_name != orderList.ownerName:
         if user_name in orderList.unpaid:
             orderList.unpaid[user_name].append(order)
+            orderList.unpaidUpdate[user_name].append(user.personalUpdate)
         else:
             orderList.unpaid[user_name] = [order]
+            orderList.unpaidUpdate[user_name] = [user.personalUpdate]
     text = backEnd.OrderLists[int(user.listUpdate.message)].fullList()
     orderList.addNewUpdate(user.listUpdate.callback_query)
 
@@ -815,6 +815,7 @@ def deleteOrder(update: Update, context: CallbackContext, orderId) -> None:
     orderList.orders.pop(int(orderId) - 1)
     if user_name != orderList.ownerName:
         orderList.unpaid[user_name].remove(order)
+        orderList.unpaidUpdate[user_name].remove(currentUser.personalUpdate)
     orderList.orderSummary[user_name].remove(order)
     text = orderList.fullList()
 
@@ -877,8 +878,10 @@ def copyOrder(update: Update, context: CallbackContext, order) -> None:
     if user_name != orderList.ownerName:
         if user_name in orderList.unpaid:
             orderList.unpaid[user_name].append(newOrder)
+            orderList.unpaidUpdate[user_name].append(personalUpdate)
         else:
             orderList.unpaid[user_name] = [newOrder]
+            orderList.unpaid[user_name] = [personalUpdate]
     text = backEnd.OrderLists[int(currentUser.listUpdate.message)].fullList()
     orderList.addNewUpdate(currentUser.listUpdate.callback_query)
 
@@ -957,15 +960,6 @@ def openOrder(update: Update, context: CallbackContext) -> None:
             reply_markup=InlineKeyboardMarkup(BUTTONS)
         )
 
-
-def reminder(update: Update, context: CallbackContext) -> None:
-    orderIndex = int(update.message)
-    currentOrder = backEnd.OrderLists[orderIndex]
-    currentListUpdate = currentOrder.groupChatListUpdate
-    currentListUpdate.callback_query.id
-    return
-
-
 def paid(update: Update, context: CallbackContext) -> None:
     user_name = f'{update.callback_query.from_user.username}'
     userId = update.callback_query.from_user.id  # correct userID
@@ -975,6 +969,7 @@ def paid(update: Update, context: CallbackContext) -> None:
     currentListUpdate = order.groupChatListUpdate
 
     order.unpaid.pop(user_name)
+    order.unpaidUpdate.pop(user_name)
     text = order.paymentList()
 
     BUTTONS = [
@@ -1000,6 +995,7 @@ def unpay(update: Update, context: CallbackContext) -> None:
     userOrder = order.getOnlyOrder(user_name)
 
     order.unpaid[user_name] = userOrder
+    order.unpaidUpdate[user_name] = currentUser.personalUpdate
     text = order.paymentList()
 
     BUTTONS = [
@@ -1022,9 +1018,9 @@ def check(update: Update, context: CallbackContext) -> None:
     BUTTONS = [
         [
             InlineKeyboardButton('Update', callback_data='135CheckUpdate' + str(index)),
+            InlineKeyboardButton('Remind', callback_data='135CheckRemind' + str(index))
         ]
     ]
-
     text = "Who owes you money 😤💵\n\n" + currentUser.outstandingOrders() + \
            "\nPeople you owe money to 🥺💵\n\n" + currentUser.outstandingPayments(user_name)
     update.message.reply_text(
@@ -1091,11 +1087,12 @@ def splitList(update: Update, context: CallbackContext) -> None:
 def contribute(update: Update, context: CallbackContext, item, index) -> None:
     user_name = f'{update.callback_query.from_user.username}'
     userId = update.callback_query.from_user.id  # correct userID
-    # currentUser = backEnd.getUser(userId)
+    currentUser = backEnd.getUser(userId)
     # index = currentUser.listID
     List = backEnd.SplitLists[index]
     contributorsArray = List.items[item][1]
     unpaidArray = List.items[item][2]
+    unpaidUpdateArray = List.items[item][3]
     List.canUpdate = True
     if user_name not in contributorsArray:
         contributorsArray.append(user_name)
@@ -1106,8 +1103,10 @@ def contribute(update: Update, context: CallbackContext, item, index) -> None:
     if List.ownerName != user_name:
         if user_name not in unpaidArray:
             unpaidArray.append(user_name)
+            unpaidUpdateArray.append(currentUser.personalUpdate)
         else:
             unpaidArray.remove(user_name)
+            unpaidUpdateArray.remove(currentUser.personalUpdate)
 
     items = List.itemArray()
     itemsKey = []
@@ -1200,8 +1199,10 @@ def splitPaid(update: Update, context: CallbackContext, item, index) -> None:
     currentListUpdate = List.groupChatUpdate
     currItem = List.items[item]
     unpaidList = currItem[2]
+    unpaidUpdateList = currItem[3]
 
     unpaidList.remove(user_name)
+    unpaidUpdateList.remove(user_name)
     text = List.unpaidList()
     title = List.Title
     items = List.itemArray()
@@ -1215,6 +1216,32 @@ def splitPaid(update: Update, context: CallbackContext, item, index) -> None:
         text=text,
         reply_markup=reply_markup
     )
+
+def reminder(update: Update, context: CallbackContext) -> None:
+    userId = update.callback_query.from_user.id
+    currentUser = backEnd.getUser(userId)
+    index = currentUser.listID
+    BUTTONS = [
+        [
+            InlineKeyboardButton('Yes', callback_data='135RemindAllYes' + str(index)),
+            InlineKeyboardButton('No', callback_data='135RemindAllNo' + str(index))
+        ]
+    ]
+
+    text = "Would you like to send a reminder to everyone who owes you money?" \
+           "If not, you can choose the people you'd like to remind"
+    update.callback_query.message.reply_text(
+        text=text,
+        reply_markup=InlineKeyboardMarkup(BUTTONS)
+    )
+
+def remindall(update: Update, context: CallbackContext) -> None:
+    userId = update.callback_query.from_user.id
+    currentUser = backEnd.getUser(userId)
+    currentUser.remindeveryone()
+    update.callback_query.message.reply_text("They have all been reminded!")
+
+
 
 
 def error(update, context):
@@ -1247,7 +1274,7 @@ def main():
     dispatcher.add_handler(CommandHandler("cancel", cancel))
     dispatcher.add_handler(CallbackQueryHandler(response))
 
-    # dispatcher.add_error_handler(error)
+    #dispatcher.add_error_handler(error)
     dispatcher.add_handler(MessageHandler(Filters.text, prompts))
     # dispatcher.add_handler(MessageHandler(Filters.text, phoneNumber))
     dispatcher.add_handler(InlineQueryHandler(inlineOrderList))

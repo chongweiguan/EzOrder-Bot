@@ -15,6 +15,8 @@ class User:
         self.currentNo = ""
         self.items = []
         self.prices = []
+        self.addingCommand = False
+        self.editingCommand = False
         self.Adding = False
         self.Ordering = False
         self.Deleting = False
@@ -25,6 +27,27 @@ class User:
 
     def isAdding(self):
         return self.Adding
+
+    def getunpaidupdateList(self):
+        updatearray = []
+        for i in range(len(self.creatorLists)):
+            list = self.creatorLists[i]
+            if list.type == "order":
+                if len(self.creatorLists[i].unpaid) != 0:
+                    updatearray.append
+
+    def remindeveryone(self):
+        for i in range(len(self.creatorLists)):
+            list = self.creatorLists[i]
+            if list.type == "order":
+                if len(self.creatorLists[i].unpaid) != 0:
+                    for key in self.creatorLists[i].unpaid:
+                        order = self.creatorLists[i].unpaid[key]
+                        for j in range(len(order)):
+                            memberUpdate = self.creatorLists[i].unpaidUpdate[key]
+                            memberUpdate[0].message.reply_text("just a reminder to transfer " + self.creatorLists[i].ownerName
+                                                        + " for this order:\n" + self.creatorLists[i].Title + " - "+ order[j].orderName)
+
 
     def outstandingOrders(self):
         text = ""

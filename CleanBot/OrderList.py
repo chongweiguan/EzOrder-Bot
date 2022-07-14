@@ -13,6 +13,7 @@ class OrderList:
         self.orders = []
         self.orderSummary = {}
         self.unpaid = {}
+        self.unpaidUpdate = {}
         self.type = "order"
         self.groupChatListUpdate = ''
         self.orderStatus = True

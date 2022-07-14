@@ -23,7 +23,8 @@ class SplitList:
         price = ""
         contributors = []
         unpaid = []
-        self.items[item] = [price,contributors,unpaid]
+        unpaidupdate = []
+        self.items[item] = [price,contributors, unpaid, unpaidupdate]
 
     def contributorsList(self):
         text = "Please indicate the items that you will be contributing for '" + \
