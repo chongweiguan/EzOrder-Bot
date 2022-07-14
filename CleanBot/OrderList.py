@@ -116,3 +116,10 @@ class OrderList:
             text += "Order " + str(x.orderId) + ": " + x.orderName + "\n"
         return text
 
+    def getTheOrder(self, orderId):
+        for x in self.orders:
+            if x.orderId == orderId:
+                return x
+        else:
+            return "order does not exist"
+

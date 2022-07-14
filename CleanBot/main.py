@@ -154,7 +154,8 @@ def copyCommand(update: Update, context: CallbackContext, list) -> None:
         peopleKey = []
         keyboard = [peopleKey]
         for x in range(len(list.orders)):
-            peopleKey.append(InlineKeyboardButton("Order " + str(x + 1), callback_data="copy" + str(x + 1)))
+            orderId = list.orders[x].orderId
+            peopleKey.append(InlineKeyboardButton(str(x + 1) + ") ", callback_data="copy" + str(orderId + 1)))
         reply_markup = InlineKeyboardMarkup(keyboard)
         text = "Which of the orders would you like to copy? \n\n" + list.fullList()
         update.message.reply_text(
@@ -320,6 +321,7 @@ def response(update: Update, context: CallbackContext) -> None:
         currentUser = backEnd.getUser(userId)
         if currentUser.Deleting:
             query.message.reply_text("Ok we shall leave your order there!")
+            currentUser.Deleting = False
         else:
             return
 
