@@ -29,7 +29,6 @@ def isfloat(num):
 
 
 def startCommand(update: Update, context: CallbackContext) -> None:
-    print(update)
     userId = update.message.from_user.id
     if not backEnd.isUser(userId):
         backEnd.addUser(userId)
@@ -437,17 +436,6 @@ def response(update: Update, context: CallbackContext) -> None:
             # currentUser.listUpdate = update
             return openOrder(update, context)
 
-    if query.data[0:9] == "135Remind":
-        print("Order list remind button works")
-        index = int(query.data[9:])
-        return remindorder(update, context, index)
-
-    if query.data[0:14] =="135SplitRemind":
-        print("Split list remind button works")
-        index = int(query.data[14:])
-        return remindsplit(update, context, index)
-
-
     if query.data[0:16] == '135SplitOpenList':
         update.message = query.data[16:]
         index = int(query.data[16:])
@@ -483,7 +471,11 @@ def response(update: Update, context: CallbackContext) -> None:
                 return unpay(update, context)
 
     if query.data[0:14] == '135CheckRemind':
+        return reminder(update, context)
+
+    if query.data[0:15] == '135RemindAllYes':
         return remindall(update, context)
+
 
     if query.data[0:13] == "135Contribute":
         item = ''
@@ -593,9 +585,6 @@ def updateList(update: Update, context: CallbackContext) -> None:
             InlineKeyboardButton('Update', callback_data='135Update' + str(index))
         ],
         [
-            InlineKeyboardButton('Remind', callback_data='135Remind' + str(index))
-        ],
-        [
             InlineKeyboardButton('Close Order', callback_data='135Close Order' + str(index)),
             InlineKeyboardButton('Open Order', callback_data='135Open Order' + str(index))
         ]
@@ -639,9 +628,6 @@ def orderList(update: Update, context: CallbackContext) -> None:
         ],
         [
             InlineKeyboardButton('Update', callback_data='135Update' + str(index))
-        ],
-        [
-            InlineKeyboardButton('Remind', callback_data='135Remind' + str(index))
         ],
         [
             InlineKeyboardButton('Close Order', callback_data='135Close Order' + str(index)),
@@ -1032,7 +1018,7 @@ def check(update: Update, context: CallbackContext) -> None:
     BUTTONS = [
         [
             InlineKeyboardButton('Update', callback_data='135CheckUpdate' + str(index)),
-            InlineKeyboardButton('Remind All', callback_data='135CheckRemind' + str(index))
+            InlineKeyboardButton('Remind', callback_data='135CheckRemind' + str(index))
         ]
     ]
     text = "Who owes you money 😤💵\n\n" + currentUser.outstandingOrders() + \
@@ -1083,9 +1069,6 @@ def splitList(update: Update, context: CallbackContext) -> None:
         ],
         [
             InlineKeyboardButton('Update', callback_data='135SplitUpdate' + str(index))
-        ],
-        [
-            InlineKeyboardButton('Remind', callback_data='135SplitRemind' + str(index))
         ],
         [
             InlineKeyboardButton('Close List', callback_data='135SplitCloseList' + str(index)),
@@ -1151,9 +1134,6 @@ def updateSplitList(update: Update, context: CallbackContext) -> None:
         ],
         [
             InlineKeyboardButton('Update', callback_data='135SplitUpdate' + str(index))
-        ],
-        [
-            InlineKeyboardButton('Remind', callback_data='135SplitRemind' + str(index))
         ],
         [
             InlineKeyboardButton('Close List', callback_data='135SplitCloseList' + str(index)),
@@ -1258,30 +1238,10 @@ def reminder(update: Update, context: CallbackContext) -> None:
 def remindall(update: Update, context: CallbackContext) -> None:
     userId = update.callback_query.from_user.id
     currentUser = backEnd.getUser(userId)
-    currentUser.remindeveryonetest()
+    currentUser.remindeveryone()
     update.callback_query.message.reply_text("They have all been reminded!")
 
-def remindorder(update: Update, context: CallbackContext, index) -> None:
-    userId = update.callback_query.from_user.id
-    currentUser = backEnd.getUser(userId)
-    order = backEnd.OrderLists[index]
-    if len(order.unpaid) != 0:
-        currentUser.remindthisorder(order)
-        update.callback_query.message.reply_text("Everyone that owes you money on " + order.Title +
-                                                " has been reminded")
-    else:
-        update.callback_query.message.reply_text("No one owes you money on " + order.Title + "!")
 
-def remindsplit(update: Update, context: CallbackContext, index) -> None:
-    userId = update.callback_query.from_user.id
-    currentUser = backEnd.getUser(userId)
-    splitlist = backEnd.SplitLists[index]
-    if splitlist.isDebt():
-        currentUser.remindthissplit(splitlist)
-        update.callback_query.message.reply_text("Everyone that owes you money on " + splitlist.Title +
-                                                " has been reminded")
-    else:
-        update.callback_query.message.reply_text("No one owes you money on " + splitlist.Title + "!")
 
 
 def error(update, context):

@@ -24,6 +24,7 @@ class User:
         self.Copying = False
         self.Splitting = False
         self.addingPrice = False
+        self.deleteConfirm = False
 
     def isAdding(self):
         return self.Adding

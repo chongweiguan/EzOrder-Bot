@@ -114,7 +114,7 @@ class OrderList:
         text = ""
         orderArray = self.orderSummary[user_name]
         for x in orderArray:
-            text += "Order " + str(x.orderId) + ": " + x.orderName + "\n"
+            text += "Order " + str(self.getArrayIndex(x)) + ": " + x.orderName + "\n"
         return text
 
     def getTheOrder(self, orderId):
@@ -124,3 +124,14 @@ class OrderList:
         else:
             return "order does not exist"
 
+    #takes in an order and return the index in the order list array
+    def getArrayIndex(self, order):
+        for x in range(len(self.orders)):
+            if self.orders[x] == order:
+                return x + 1
+
+    #takes in an orderId retrun the Order with that id
+    def getOrderID(self, id):
+        for x in self.orders:
+            if x.orderId == int(id):
+                return x
