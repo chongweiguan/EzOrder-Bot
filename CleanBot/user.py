@@ -36,17 +36,68 @@ class User:
                 if len(self.creatorLists[i].unpaid) != 0:
                     updatearray.append
 
-    def remindeveryone(self):
+    def remindeveryonetest(self):
         for i in range(len(self.creatorLists)):
             list = self.creatorLists[i]
             if list.type == "order":
                 if len(self.creatorLists[i].unpaid) != 0:
                     for key in self.creatorLists[i].unpaid:
+                        text = "just a reminder to transfer " + self.creatorLists[i].ownerName + ": for these orders:\n\n" + \
+                               self.creatorLists[i].Title + "\n"
                         order = self.creatorLists[i].unpaid[key]
+                        memberUpdate = self.creatorLists[i].unpaidUpdate[key]
                         for j in range(len(order)):
-                            memberUpdate = self.creatorLists[i].unpaidUpdate[key]
-                            memberUpdate[0].message.reply_text("just a reminder to transfer " + self.creatorLists[i].ownerName
-                                                        + " for this order:\n" + self.creatorLists[i].Title + " - "+ order[j].orderName)
+                            text = text + str(j+1) + ")" + order[j].orderName + "\n"
+                        memberUpdate[0].message.reply_text(text)
+
+            if list.isDebt():
+                personunpaiditems = {}
+                for key in list.items.keys():
+                    peopleupdatelist = list.getpersonalupdatearray(key)
+                    for i in range(len(peopleupdatelist)):
+                        if peopleupdatelist[i] in personunpaiditems:
+                            personunpaiditems[peopleupdatelist[i]].append(key)
+                        else:
+                            personunpaiditems[peopleupdatelist[i]] = []
+                            personunpaiditems[peopleupdatelist[i]].append(key)
+
+                for key in personunpaiditems:
+                    text = "just a reminder to transfer " + self.creatorLists[
+                        i].ownerName + ": for the following items:\n\n" + \
+                           self.creatorLists[i].Title + "\n"
+                    for i in range(len(personunpaiditems[key])):
+                        text = text + personunpaiditems[key][i] + "\n"
+                    key.message.reply_text(text)
+
+
+    def remindthisorder(self, list):
+        for key in list.unpaid:
+            text = "just a reminder to transfer " + list.ownerName + ": for these orders:\n\n" + \
+                   list.Title + ":\n"
+            order = list.unpaid[key]
+            memberUpdate = list.unpaidUpdate[key]
+            for j in range(len(order)):
+                text = text + str(j + 1) + ")" + order[j].orderName + "\n"
+            memberUpdate[0].message.reply_text(text)
+
+    def remindthissplit(self, list):
+        personunpaiditems = {}
+        for key in list.items.keys():
+            peopleupdatelist = list.getpersonalupdatearray(key)
+            for i in range(len(peopleupdatelist)):
+                if peopleupdatelist[i] in personunpaiditems:
+                    personunpaiditems[peopleupdatelist[i]].append(key)
+                else:
+                    personunpaiditems[peopleupdatelist[i]] = []
+                    personunpaiditems[peopleupdatelist[i]].append(key)
+
+        for key in personunpaiditems:
+            text = "just a reminder to transfer " + self.creatorLists[i].ownerName + ": for the following items:\n\n" + \
+                   self.creatorLists[i].Title + ":\n"
+            for i in range(len(personunpaiditems[key])):
+                text = text + str(i + 1) + ")" + personunpaiditems[key][i] + "\n"
+            key.message.reply_text(text)
+
 
 
     def outstandingOrders(self):

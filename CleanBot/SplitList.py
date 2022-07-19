@@ -17,7 +17,7 @@ class SplitList:
 
     def makeItemsDict(self, userItems, userPrices):
         for (x, y) in zip(userItems, userPrices):
-            self.items[x] = [y, [], []]
+            self.items[x] = [y, [], [], []]
 
     def addItem(self, item):
         price = ""
@@ -58,11 +58,14 @@ class SplitList:
             people.append(val)
         return people
 
-    def unpaidArray(self,key):
+    def unpaidArray(self, key):
         people = []
         for val in self.items[key][2]:
             people.append(val)
         return people
+
+    def getpersonalupdatearray(self, item):
+        return self.items[item][3]
 
     def getLatestItem(self):
         itemsArray = self.itemArray()
