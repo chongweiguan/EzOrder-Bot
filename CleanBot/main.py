@@ -37,6 +37,15 @@ def startCommand(update: Update, context: CallbackContext) -> None:
     user.personalUpdate = update
     update.message.reply_text("The bot is now activated, you no longer have to activate it again!")
 
+def paylahtest(update: Update, context: CallbackContext) -> None:
+    keyboard = [
+        [
+            InlineKeyboardButton("PayLah", url="https://www.dbs.com.sg/personal/mobile/paylink"),
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    update.message.reply_text("this is a paylah test!",
+                              reply_markup=reply_markup)
 
 def createCommand(update: Update, context: CallbackContext) -> None:
     userId = update.message.from_user.id
@@ -934,6 +943,9 @@ def closedOrder(update: Update, context: CallbackContext) -> None:
     BUTTONS = [
         [
             InlineKeyboardButton('Paid', callback_data='135Paid' + str(orderIndex)),
+        ],
+        [
+            InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink"),
         ]
     ]
     update.callback_query.message.reply_text("Order List " + "'" + title + "'" + " is now closed")
@@ -988,7 +1000,10 @@ def paid(update: Update, context: CallbackContext) -> None:
 
     BUTTONS = [
         [
-            InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
+            InlineKeyboardButton('Paid', callback_data='135Paid' + str(index))
+        ],
+        [
+            InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink"),
         ]
     ]
     for value in order.updateList.values():
@@ -1014,7 +1029,10 @@ def unpay(update: Update, context: CallbackContext) -> None:
 
     BUTTONS = [
         [
-            InlineKeyboardButton('Paid', callback_data='135Paid' + str(index)),
+            InlineKeyboardButton('Paid', callback_data='135Paid' + str(index))
+        ],
+        [
+            InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink"),
         ]
     ]
     for value in order.updateList.values():
@@ -1178,7 +1196,7 @@ def closedSplitList(update: Update, context: CallbackContext) -> None:
     title = currList.Title
     items = currList.itemArray()
     itemsKey = []
-    buttons = [itemsKey]
+    buttons = [itemsKey,[InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink")]]
     for x in items:
         itemsKey.append(InlineKeyboardButton("Paid for " + x, callback_data="135SplitPaid" + str(splitIndex) + "/" + x))
     reply_markup = InlineKeyboardMarkup(buttons)
@@ -1227,7 +1245,7 @@ def splitPaid(update: Update, context: CallbackContext, item, index) -> None:
     title = List.Title
     items = List.itemArray()
     itemsKey = []
-    buttons = [itemsKey]
+    buttons = [itemsKey,[InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink")]]
     for x in items:
         itemsKey.append(InlineKeyboardButton("Paid for " + x, callback_data="135SplitPaid" + str(index) + "/" + x))
     reply_markup = InlineKeyboardMarkup(buttons)
@@ -1312,6 +1330,7 @@ def main():
     dispatcher.add_handler(CommandHandler("start", startCommand))
     dispatcher.add_handler(CommandHandler("create", createCommand))
     dispatcher.add_handler(CommandHandler("cancel", cancel))
+    #dispatcher.add_handler(CommandHandler("paylah", paylahtest))
     dispatcher.add_handler(CallbackQueryHandler(response))
 
     #dispatcher.add_error_handler(error)
