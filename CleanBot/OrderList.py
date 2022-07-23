@@ -1,60 +1,40 @@
+import firebase
 class OrderList:
 
-    def __init__(self, listId, timing, backEndId):
+    def __init__(self, listId, timing, backEndId, ownerName, phoneNum, Title):
         self.listId = listId
         self.backEndId = backEndId
         self.timing = timing[1:20]
-        self.ownerName = ""
-        self.phoneNum = ""
-        self.Title = ""
-        self.peopleList = []
+        self.ownerName = ownerName
+        self.phoneNum = phoneNum
+        self.Title = Title
+        self.orderId = 0
         #chat instance key, update value
         self.updateList = {}
         self.orders = []
-        self.orderSummary = {}
         self.unpaid = {}
         self.unpaidUpdate = {}
         self.type = "order"
-        self.groupChatListUpdate = ''
         self.orderStatus = True
-        self.addOrder = False
-        self.editOrder = False
-        self.copyOrder = False
-        self.deleteOrder = False
         self.canUpdate = False
         self.counter = 0
 
-    def addName(self, name):
-        self.peopleList.append(name)
-
-    def addOrder(self, order):
-        self.orders.append(order)
-
-    def getIndex(self, name):
-        for i in range(len(self.peopleList)):
-            if name == self.peopleList[i]:
-                return i
 
     def getCheckList(self):
-        text = self.Title
-        keys = []
-        vals = []
-        for key in self.unpaid.keys():
-            keys.append(key)
-        for val in self.unpaid.values():
-            vals.append(val)
-        for i in range(len(keys)):
-            for x in range(len(vals[i])):
-                text = text + "\n" + keys[i] + " - " + vals[i][x].orderName
+        text = ""
+        index = 1
+        for x,y in self.unpaid.items():
+            for v in y:
+                text += "\n" + str(index) + ") " + x + " - " + v["order"]
+                index += 1
         return text
 
     def fullList(self):
         warning = "If this is your first time using the bot, before doing anything, click the bot chat button " + \
                   "followed by the Start button. Then head back to this chat to start using the buttons below!!\n\n"
         text = warning + "Collating orders for " + self.Title + "! \nTransfer to " + self.phoneNum + "\n\n\nOrders:"
-        for i in range(len(self.peopleList)):
-            text = text + "\n" + str(i + 1) + ") " + self.peopleList[i] + " - " + self.orders[i].orderName
-
+        for i in range(len(self.orders)):
+            text = text + "\n" + str(i + 1) + ") " + self.orders[i]["user"] + " - " + self.orders[i]["order"]
         return text
 
     def paymentList(self):
@@ -62,7 +42,7 @@ class OrderList:
                self.Title + "! \n\n\nOrders will be removed once you click the Paid button: "
         for k, v in self.unpaid.items():
             for x in v:
-                text += "\n" + k + " - " + x.orderName
+                text += "\n" + k + " - " + x["order"]
         return text
 
     def getCheckOrder(self, name):
@@ -75,20 +55,18 @@ class OrderList:
         return text
 
     def getOrder(self, name):
-        text = ""
-        orderArray = self.orderSummary[name]
-        if orderArray is None:
+        try:
+            self.orders[0]
+        except KeyError:
             return "no such order"
-        for x in orderArray:
-            text += name + " - " + x.orderName + "\n"
-        return text
 
 
     def getOnlyOrder(self, name):
-        for i in range(len(self.peopleList)):
-            if name == self.peopleList[i]:
-                return self.orderSummary[name]
-        return "no such order"
+        arr = []
+        for x in self.orders:
+            if x["user"] == name:
+                arr.append(x)
+        return arr
 
     def paidStatus(self, username):
         if username in self.unpaid:
@@ -96,9 +74,11 @@ class OrderList:
         else:
             return False
 
-    def addNewUpdate(self, update):
-        if update.chat_instance not in self.updateList:
-            self.updateList[update.chat_instance] = update
+    def addNewUpdate(self, update, index):
+        if update.callback_query.chat_instance not in self.updateList:
+            self.updateList[update.callback_query.chat_instance] = update
+            firebase.db.child("orderLists").child(index).child("updateList")\
+                .set({update.callback_query.chat_instance: update.to_json()})
 
     def checkItems(self, item):
         for k in self.items.keys():
@@ -110,11 +90,12 @@ class OrderList:
         self.counter += 1
         return self.counter
 
+    #takes in username and return a text with all the users order
     def indivOrders(self, user_name):
         text = ""
-        orderArray = self.orderSummary[user_name]
-        for x in orderArray:
-            text += "Order " + str(self.getArrayIndex(x)) + ": " + x.orderName + "\n"
+        orderArray = self.orderArray(user_name)
+        for x in range(len(orderArray)):
+            text += str(x + 1) + ": " + orderArray[x] + "\n"
         return text
 
     def getTheOrder(self, orderId):
@@ -135,3 +116,45 @@ class OrderList:
         for x in self.orders:
             if x.orderId == int(id):
                 return x
+
+    #takes in a username and return boolean value of whether the user's order is in the list
+    def isOrder(self, username):
+        for x in self.orders:
+            if x["user"] == username:
+                return True
+        return False
+
+    #takes in a username and return an array of users order
+    def orderArray(self, username):
+        ret = []
+        for x in self.orders:
+            if x["user"] == username:
+                ret.append(x["order"])
+        return ret
+
+    def idArray(self, username):
+        ret = []
+        for x in self.orders:
+            if x["user"] == username:
+                ret.append(x["orderId"])
+        return ret
+
+    #takes in an orderId and return order name
+    def getName(self, orderId):
+        for x in self.orders:
+            if x["orderId"] == int(orderId):
+                return x["order"]
+
+    #takes in a new order and change it with the old one
+    def changeOrder(self, edited, orderId):
+        for x in self.orders:
+            if x["orderId"] == int(orderId):
+                x["order"] = edited
+
+    def getRid(self, orderId):
+        counter=0
+        for x in self.orders:
+            if x["orderId"] == int(orderId):
+                self.orders.pop(counter)
+            counter+=1
+

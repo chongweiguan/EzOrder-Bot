@@ -55,3 +55,15 @@ class backEnd:
         for i in range(len(self.CreatorList)):
             if userID == self.CreatorList[i].id:
                 return i
+
+    def getList(self, index):
+        for x in self.OrderLists:
+            if x.listId == index:
+                return x
+        return None
+
+    def getSplit(self, index):
+        for x in self.SplitLists:
+            if x.listId == index:
+                return x
+        return None
