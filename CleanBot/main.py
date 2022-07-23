@@ -9,11 +9,11 @@ from datetime import datetime
 import json
 import firebase
 
-updater = Updater('5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
+updater = Updater('5316303881:AAEIysIUYoZ45d1EwN_5Jl6dGonJfv_ZE8g')
 dispatcher = updater.dispatcher
 START_MESSAGE = 'This bot will help you create an order list, check your outstanding payments, or split money! use /create to begin!'
 CRASH_MESSAGE = 'Oops something went wrong, type /start and try again'
-botURL = 'https://t.me/ezordertest_bot'
+botURL = 'https://t.me/ezezezezezorderbot'
 bot = Bot('5374066926:AAE7IMAU8bjduSafS1DAzjk6Kpz6X9zIHQ0')
 backEnd = backEnd()
 listId = 0
@@ -491,6 +491,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
                                      "finish that before creating another list or type /cancel"
                                      + " to terminate this order")
             return
+        elif user.Adding or user.Editing or user.Deleting or user.Copying:
+            return
         else:
             user.currentTitle = ""
             user.currentNo = ""
@@ -501,6 +503,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         user = backEnd.getUser(userId)
         if user is None:
             query.message.reply_text("Oops something went wrong, try /create again")
+            return
+        elif user.Adding or user.Editing or user.Deleting or user.Copying:
             return
         return check(query, context)
 
@@ -514,6 +518,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
             query.message.reply_text("You're in the middle of creating a Order List, " +
                                      "finish that before creating another list or type /cancel"
                                      + " to terminate this order")
+            return
+        elif user.Adding or user.Editing or user.Deleting or user.Copying:
             return
         else:
             user.currentTitle = ""
@@ -1028,7 +1034,9 @@ def inlineOrderList(update: Update, context: CallbackContext):
                 splitList = recoverSplit(index)
             items = splitList.itemArray()
             itemsKey = []
-            buttons = [itemsKey]
+            buttons = [itemsKey, [
+                InlineKeyboardButton('Bot Chat', url=botURL)
+            ]]
             for x in items:
                 itemsKey.append(InlineKeyboardButton(x, callback_data="135Contribute" + str(index) + "/" + x))
             reply_markup = InlineKeyboardMarkup(buttons)
@@ -1043,7 +1051,6 @@ def inlineOrderList(update: Update, context: CallbackContext):
                 )
             )
     update.inline_query.answer(results)
-
 
 def addingOrder(update: Update, context: CallbackContext) -> None:
     user_name = f'{update.message.from_user.username}'
@@ -1153,12 +1160,15 @@ def editingOrder(update: Update, context: CallbackContext) -> None:
         ]
     ]
 
-    update.message.reply_text("Your Order has been Edited!")
-    for value in orderList.updateList.values():
-        value.callback_query.edit_message_text(
-            text=text,
-            reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
-        )
+    try:
+        for value in orderList.updateList.values():
+            value.callback_query.edit_message_text(
+                text=text,
+                reply_markup=InlineKeyboardMarkup(ORDER_BUTTONS)
+            )
+            update.message.reply_text("Your Order has been Edited!")
+    except:
+        update.message.reply_text("Your Order was the same")
     currentUser.Editing = False
     currentUser.editPart = False
 
@@ -1547,7 +1557,9 @@ def contribute(update: Update, context: CallbackContext, item, index) -> None:
 
     items = List.itemArray()
     itemsKey = []
-    buttons = [itemsKey]
+    buttons = [itemsKey, [
+                    InlineKeyboardButton('Bot Chat', url=botURL)
+                ]]
     for x in items:
         itemsKey.append(InlineKeyboardButton(x, callback_data="135Contribute" + str(index) + "/" + x))
     reply_markup = InlineKeyboardMarkup(buttons)
@@ -1623,7 +1635,9 @@ def openSplitList(update: Update, context: CallbackContext, index) -> None:
     title = currentList.Title
     items = currentList.itemArray()
     itemsKey = []
-    buttons = [itemsKey]
+    buttons = [itemsKey, [
+        InlineKeyboardButton('Bot Chat', url=botURL)
+    ]]
     for x in items:
         itemsKey.append(InlineKeyboardButton(x, callback_data="135Contribute" + str(splitIndex) + "/" + x))
     reply_markup = InlineKeyboardMarkup(buttons)

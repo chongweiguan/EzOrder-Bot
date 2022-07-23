@@ -30,8 +30,9 @@ class OrderList:
         return text
 
     def fullList(self):
-        warning = "If this is your first time using the bot, before doing anything, click the bot chat button " + \
-                  "followed by the Start button. Then head back to this chat to start using the buttons below!!\n\n"
+        warning = "‼️If this is your first time using the bot, before doing anything, click the bot chat button " + \
+                  "followed by the Start button or type /start. Then head back to this chat to start using the " + \
+                  "buttons below!!\n\n"
         text = warning + "Collating orders for " + self.Title + "! \nTransfer to " + self.phoneNum + "\n\n\nOrders:"
         for i in range(len(self.orders)):
             text = text + "\n" + str(i + 1) + ") " + self.orders[i]["user"] + " - " + self.orders[i]["order"]

@@ -24,25 +24,6 @@ class SplitList:
         unpaidupdate = []
         self.items[item] = [price,contributors, unpaid, unpaidupdate]
 
-    def contributorsList(self):
-        text = "Please indicate the items that you will be contributing for '" + \
-            self.Title + "'!\n\n"
-
-        keys = []
-        vals = []
-        for key in self.items.keys():
-            keys.append(key)
-        for val in self.items.values():
-            vals.append(val)
-
-        for i in range(len(keys)):
-            text = text + keys[i] + " $" + self.getPrice(keys[i]) +":\n"
-            for j in range(len(vals[i][1])):
-                text = text + vals[i][1][j] + "\n"
-            text = text + "\n"
-
-        text = text + "\n"
-        return text
 
     def contributorsArray(self, key):
         people = []
@@ -143,8 +124,10 @@ class SplitList:
 
     #fulllist split list version
     def contributorsList(self):
-        text = "Please indicate the items that you will be contributing for '" + \
-            self.Title + "'!\n\n"
+        text = "‼️If this is your first time using the bot, before doing anything, click the bot chat button " + \
+               "followed by the Start button or type /start. Then head back to this chat to start using the " + \
+               "buttons below!!\n\n Please indicate the items that you will be contributing for " + \
+               self.Title + "'!\n\n"
 
         keys = []
         vals = []
