@@ -37,6 +37,8 @@ def getAnd(str):
 
 def recoverList(index):
     dict = firebase.db.child("orderLists").child(index).get().val()
+    if dict is None:
+        return
     recovered = OrderList(index, dict['timing'], dict['backEndId'], dict['OwnerName'], dict["phoneNum"], dict["Title"])
     recovered.orderStatus = firebase.db.child("orderLists").child(index).get().val()["orderStatus"]
     orders = firebase.db.child("orderLists").child(index).child("orders").get()
@@ -73,6 +75,8 @@ def recoverList(index):
 
 def recoverSplit(index):
     dict = firebase.db.child("splitLists").child(index).get().val()
+    if dict is None:
+        return
     recovered = SplitList(index, dict['timing'], dict['backEndId'], dict['OwnerName'], dict["phoneNum"], dict["Title"])
     recovered.orderStatus = firebase.db.child("splitLists").child(index).get().val()["orderStatus"]
     orders = firebase.db.child("splitLists").child(index).child("orders").get()
@@ -137,6 +141,8 @@ def outstandingPayments(user, username):
             orderList = backEnd.getList(id)
             if orderList is None:
                 orderList = recoverList(id)
+                if orderList is None:
+                    return
             orders = orderList.unpaid[username]
             if orders is not None:
                 text = text + orderList.ownerName + " for " + orderList.Title + ": \n"
@@ -148,6 +154,8 @@ def outstandingPayments(user, username):
             splitList = backEnd.getSplit(id)
             if splitList is None:
                 splitList = recoverSplit(id)
+                if splitList is None:
+                    return
             items = splitList.orders
             itemDebt = ""
             index = 1
@@ -156,7 +164,7 @@ def outstandingPayments(user, username):
                     itemDebt += str(index) + ") " + x + "\n"
                     index += 1
             if not itemDebt == "":
-                text += text + splitList.ownerName + " for " + splitList.Title + ": \n" + itemDebt
+                text = text + splitList.ownerName + " for " + splitList.Title + ": \n" + itemDebt
         text = text + "\n"
     return text
 
@@ -169,12 +177,14 @@ def remindeveryone(currentUser):
             orderList = backEnd.getList(id)
             if orderList is None:
                 orderList = recoverList(id)
+                if orderList is None:
+                    return
             if len(orderList.unpaid) != 0:
                 for x, y in orderList.unpaid.items():
                     username = x
                     memberUpdate = orderList.unpaidUpdate[username]
                     text = "Just a reminder to transfer " + orderList.ownerName + ": for these orders:\n\n" + \
-                            orderList.Title + "\n"
+                           orderList.Title + "\n"
                     index = 1
                     for a in y:
                         text = text + str(index) + ") " + a["order"] + "\n"
@@ -184,6 +194,8 @@ def remindeveryone(currentUser):
             splitList = backEnd.getSplit(id)
             if splitList is None:
                 splitList = recoverSplit(id)
+                if splitList is None:
+                    return
             personunpaiditems = {}
             for key in splitList.orders.keys():
                 peopleupdatelist = splitList.orders[key][3]
@@ -204,7 +216,6 @@ def remindeveryone(currentUser):
                 key.message.reply_text(text)
 
 
-
 def outstandingOrders(currentUser, user_name):
     text = ""
     for i in range(len(currentUser.creatorLists)):
@@ -215,12 +226,16 @@ def outstandingOrders(currentUser, user_name):
             orderList = backEnd.getList(id)
             if orderList is None:
                 orderList = recoverList(id)
+                if orderList is None:
+                    return
             if len(orderList.unpaid) != 0:
                 text = text + "Yet to pay for " + orderList.Title + ": " + orderList.getCheckList() + " \n"
         else:
             splitList = backEnd.getSplit(id)
             if splitList is None:
                 splitList = recoverSplit(id)
+                if splitList is None:
+                    return
             items = splitList.orders
             debtors = ""
             index = 1
@@ -542,6 +557,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         currentList = backEnd.getList(index)
         if currentList is None:
             currentList = recoverList(index)
+            if currentList is None:
+                return
         currentList.groupChatListUpdate = update
         return addCommand(currentUser.personalUpdate, context, index)
 
@@ -560,6 +577,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         currentList = backEnd.getList(index)
         if currentList is None:
             currentList = recoverList(index)
+            if currentList is None:
+                return
         return deleteCommand(currentUser.personalUpdate, context, currentList, index)
 
     if query.data[0:11] == "135NoDelete":
@@ -600,6 +619,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         currentList = backEnd.getList(index)
         if currentList is None:
             currentList = recoverList(index)
+            if currentList is None:
+                return
         currentList.groupChatListUpdate = update
         return editCommand(currentUser.personalUpdate, context, currentList, index)
 
@@ -617,6 +638,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         currentList = backEnd.getUser(index)
         if currentList is None:
             currentList = recoverList(index)
+            if currentList is None:
+                return
         currentList.groupChatListUpdate = update
         return copyCommand(currentUser.personalUpdate, context, currentList, index)
 
@@ -631,6 +654,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         currentUser.listUpdate = update
         if orderList is None:
             orderList = recoverList(index)
+            if orderList is None:
+                return
         return updateList(update, context, index)
 
     if query.data[0:14] == "135Close Order":
@@ -638,6 +663,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         orderList = backEnd.getList(index)
         if orderList is None:
             orderList = recoverList(index)
+            if orderList is None:
+                return
         length = len(orderList.orders)
         if length == 0:
             query.message.reply_text("Cannot close an empty Order List")
@@ -659,6 +686,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         splitOrder = backEnd.getSplit(index)
         if splitOrder is None:
             splitOrder = recoverSplit(index)
+            if splitOrder is None:
+                return
         if splitOrder.isEmpty():
             query.message.reply_text("Cannot close an empty Order List")
         elif not splitOrder.orderStatus:
@@ -678,6 +707,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         orderList = backEnd.getList(index)
         if orderList is None:
             orderList = recoverList(index)
+            if orderList is None:
+                return
         if orderList.orderStatus:
             query.message.reply_text("Order List is already Opened")
         else:
@@ -696,6 +727,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         orderList = backEnd.getList(index)
         if orderList is None:
             orderList = recoverList(index)
+            if orderList is None:
+                return
         userId = update.callback_query.message.chat.id
         currentUser = backEnd.getUser(userId)
         if currentUser is None:
@@ -710,6 +743,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         orderList = backEnd.getSplit(index)
         if orderList is None:
             orderList = recoverSplit(index)
+            if orderList is None:
+                return
         userId = update.callback_query.message.chat.id
         currentUser = backEnd.getUser(userId)
         if currentUser is None:
@@ -720,7 +755,9 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         index = int(query.data[16:])
         splitOrder = backEnd.getSplit(index)
         if splitOrder is None:
-            splitOrder = recoverList(index)
+            splitOrder = recoverSplit(index)
+            if splitOrder is None:
+                return
         if splitOrder.orderStatus:
             query.message.reply_text("Order List is already Opened")
         # currentUser.listUpdate = update
@@ -749,6 +786,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         orderList = backEnd.getList(index)
         if orderList is None:
             orderList = recoverList(index)
+            if orderList is None:
+                return
         if len(orderList.orders) == 0:
             return
         elif orderList.ownerName == username:
@@ -790,6 +829,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         currentUser.listUpdate = update
         if currentList is None:
             currentList = recoverSplit(index)
+            if currentList is None:
+                return
         return contribute(update, context, item, index)
 
     if query.data[0:14] == "135SplitUpdate":
@@ -803,6 +844,8 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         currentUser.listUpdate = update
         if splitOrder is None:
             splitOrder = recoverSplit(index)
+            if splitOrder is None:
+                return
         return updateSplitList(update, context)
 
     if query.data[0:12] == "135SplitPaid":
@@ -826,12 +869,22 @@ def response(update: Update, context: CallbackContext, order=None) -> None:
         currentList = backEnd.getList(index)
         if currentList is None:
             currentList = recoverSplit(index)
+            if currentList is None:
+                return
         if currentList.ownerName == username:
             return
         elif currentList.paidStatus(username):
+            print(currentList.orders)
+            # try:
             return splitPaid(update, context, item, index)
+            # except:
+            #     return
         else:
-            return splitUnpay(update, context, item, index)
+            print(currentList.orders)
+            try:
+                return splitUnpay(update, context, item, index)
+            except:
+                return
 
     if query.data[0:6] == 'delete':
         andIndex = getAnd(query.data)
@@ -1005,6 +1058,8 @@ def inlineOrderList(update: Update, context: CallbackContext):
             orderlist = backEnd.getList(index)
             if orderlist is None:
                 recoverList(index)
+                if orderList is None:
+                    return
             ORDER_BUTTONS = [
                 [
                     InlineKeyboardButton('Add Order', callback_data='135Add Order' + str(index)),
@@ -1032,6 +1087,8 @@ def inlineOrderList(update: Update, context: CallbackContext):
             splitList = backEnd.getSplit(index)
             if splitList is None:
                 splitList = recoverSplit(index)
+                if splitList is None:
+                    return
             items = splitList.itemArray()
             itemsKey = []
             buttons = [itemsKey, [
@@ -1051,6 +1108,7 @@ def inlineOrderList(update: Update, context: CallbackContext):
                 )
             )
     update.inline_query.answer(results)
+
 
 def addingOrder(update: Update, context: CallbackContext) -> None:
     user_name = f'{update.message.from_user.username}'
@@ -1402,7 +1460,7 @@ def unpay(update: Update, context: CallbackContext) -> None:
     orderList.unpaid[user_name] = userOrders
     backEndId = orderList.backEndId
     for x in userOrders:
-        firebase.db.child("ordernLists").child(index).child("unpaid").child(user_name).push(x)
+        firebase.db.child("orderLists").child(index).child("unpaid").child(user_name).push(x)
 
     debtListData = {"listId": currentUser.listID, "type": "order"}
     firebase.db.child("users").child(userId).child("debtList").child(backEndId).set(debtListData)
@@ -1558,8 +1616,8 @@ def contribute(update: Update, context: CallbackContext, item, index) -> None:
     items = List.itemArray()
     itemsKey = []
     buttons = [itemsKey, [
-                    InlineKeyboardButton('Bot Chat', url=botURL)
-                ]]
+        InlineKeyboardButton('Bot Chat', url=botURL)
+    ]]
     for x in items:
         itemsKey.append(InlineKeyboardButton(x, callback_data="135Contribute" + str(index) + "/" + x))
     reply_markup = InlineKeyboardMarkup(buttons)
@@ -1614,7 +1672,7 @@ def closedSplitList(update: Update, context: CallbackContext, index) -> None:
     title = currList.Title
     items = currList.itemArray()
     itemsKey = []
-    buttons = [itemsKey,[InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink")]]
+    buttons = [itemsKey, [InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink")]]
     for x in items:
         itemsKey.append(InlineKeyboardButton("Paid for " + x, callback_data="135SplitPaid" + str(splitIndex) + "/" + x))
     reply_markup = InlineKeyboardMarkup(buttons)
@@ -1643,11 +1701,11 @@ def openSplitList(update: Update, context: CallbackContext, index) -> None:
     reply_markup = InlineKeyboardMarkup(buttons)
     update.callback_query.message.reply_text("Split List " + "'" + title + "'" + "is now opened")
     for value in currentList.updateList.values():
+        print(value.callback_query)
         value.callback_query.edit_message_text(
             text=text,
             reply_markup=reply_markup
         )
-
 
 
 def splitPaid(update: Update, context: CallbackContext, item, index) -> None:
@@ -1662,7 +1720,10 @@ def splitPaid(update: Update, context: CallbackContext, item, index) -> None:
         if x == user_name:
             break
         counter += 1
-    unpaidList.remove(user_name)
+    try:
+        unpaidList.remove(user_name)
+    except ValueError:
+        return
     unpaidUpdateList.pop(counter)
     unpay = firebase.db.child("splitLists").child(index).child("orders").child(item).child("unpaid").get()
     for un in unpay.each():
@@ -1674,7 +1735,7 @@ def splitPaid(update: Update, context: CallbackContext, item, index) -> None:
     title = List.Title
     items = List.itemArray()
     itemsKey = []
-    buttons = [itemsKey]
+    buttons = [itemsKey, [InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink")]]
     for x in items:
         itemsKey.append(InlineKeyboardButton("Paid for " + x, callback_data="135SplitPaid" + str(index) + "/" + x))
     reply_markup = InlineKeyboardMarkup(buttons)
@@ -1702,7 +1763,7 @@ def splitUnpay(update: Update, context: CallbackContext, item, index) -> None:
     title = List.Title
     items = List.itemArray()
     itemsKey = []
-    buttons = [itemsKey,[InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink")]]
+    buttons = [itemsKey, [InlineKeyboardButton("PayLah!", url="https://www.dbs.com.sg/personal/mobile/paylink")]]
     for x in items:
         itemsKey.append(InlineKeyboardButton("Paid for " + x, callback_data="135SplitPaid" + str(index) + "/" + x))
     reply_markup = InlineKeyboardMarkup(buttons)

@@ -1,15 +1,15 @@
 import pyrebase
 
 firebaseConfig = {
-    "apiKey": "AIzaSyAMIjHkOJsMOI1deAKaMxWHy2NEWQUYwdM",
-    "authDomain": "ezordertesting-2f378.firebaseapp.com",
-    "databaseURL": "https://ezordertesting-2f378-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "projectId": "ezordertesting-2f378",
-    "storageBucket": "ezordertesting-2f378.appspot.com",
-    "messagingSenderId": "329470688965",
-    "appId": "1:329470688965:web:6b62dadd02f3edc0eefaac",
-    "measurementId": "G-9Y8X2BHNCR"
+  "apiKey": "AIzaSyCyA1ZkuzJsxOR0-CdXhoMfTr4tT6_bCWM",
+  "authDomain": "ezorderbot-32361.firebaseapp.com",
+  "databaseURL": "https://ezorderbot-32361-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  "projectId": "ezorderbot-32361",
+  "storageBucket": "ezorderbot-32361.appspot.com",
+  "messagingSenderId": "1001383637914",
+  "appId": "1:1001383637914:web:211e440b4a0c3f2046c023"
 }
+
 
 firebase = pyrebase.initialize_app(firebaseConfig)
 
